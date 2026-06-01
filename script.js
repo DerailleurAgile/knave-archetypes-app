@@ -12,7 +12,6 @@ const ARCH_ORDER = ['blade','shadow','endurer','sage','wayfarer','devoted'];
 // DIRECTION-SENSITIVE MATRIX — all 36 cells unique
 // Key: 'PRIMARY-SECONDARY' (Row = Primary, Column = Secondary)
 const MATRIX = {
-
   // ── DIAGONALS ────────────────────────────────────────────────────────────
   'blade-blade':       { name:'the veteran',          desc:'All you know is the fight. Hard-won scars and harder-won lessons. You have been hit by everything and you are still here.',                                                                       eg:'Jaime Lannister, Conan, the old soldier who should have died ten years ago, a retired pit champion' },
   'shadow-shadow':     { name:'the ghost',             desc:'You barely exist. False names, false faces, false trails. You are whoever the moment requires, and when it is over, you were never there.',                                                       eg:'a master spy, a con artist at the peak of their game, a thief who has never once been seen' },
@@ -283,6 +282,7 @@ function renderMatrix() {
     colHdr.addEventListener('click', () => {
       activeCharId = null;
       builderSel[1] = (builderSel[1] === colId) ? null : colId;
+      selectedCareers = []; // Clear chosen careers on archetype state update
       renderMatrix();
       renderBuilderResult();
       renderCharList();
@@ -312,6 +312,7 @@ function renderMatrix() {
     rowHdr.addEventListener('click', () => {
       activeCharId = null;
       builderSel[0] = (builderSel[0] === rowId) ? null : rowId;
+      selectedCareers = []; // Clear chosen careers on archetype state update
       renderMatrix();
       renderBuilderResult();
       renderCharList();
@@ -347,6 +348,7 @@ function renderMatrix() {
         } else {
           builderSel = [rowId, colId];
         }
+        selectedCareers = []; // Clear chosen careers on archetype state update
         renderMatrix();
         renderBuilderResult();
         renderCharList();
@@ -412,7 +414,6 @@ function renderBuilderResult() {
   const only1 = c1.filter(c => !shared.includes(c));
   const only2 = c2.filter(c => !shared.includes(c));
 
-  // REMOVED Conditonal check so both badges render unconditionally when a cell is active
   const badgeHTML = `
     <div class="arch-badges">
       <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary: ${a1.name} · ${a1.stat}</span>
@@ -471,6 +472,7 @@ function renderClearMatrixFilterBtn() {
     btn.onclick = () => {
       builderSel = [null, null];
       activeCharId = null;
+      selectedCareers = []; // Clear chosen careers on filter wipe/reset
       renderMatrix();
       renderBuilderResult();
       renderCharList();
@@ -485,21 +487,15 @@ function characterMatchesMatrixFilter(c) {
   const [m1, m2] = builderSel;
   if (!m1 && !m2) return true;
   
-  // Both axes selected: strict positional match
   if (m1 && m2) {
     return c.archs[0] === m1 && c.archs[1] === m2;
   }
-  
-  // Only Primary axis selected
   if (m1) {
     return c.archs[0] === m1;
   }
-  
-  // Only Secondary axis selected
   if (m2) {
     return c.archs[1] === m2;
   }
-  
   return true;
 }
 
@@ -552,6 +548,7 @@ function renderCharList() {
         renderCharResult(c);
         builderSel = [c.archs[0], c.archs[1]];
       }
+      selectedCareers = []; // Clear chosen careers when migrating archetype setups via profiles
       
       renderCharList(); 
       renderMatrix();
@@ -610,15 +607,12 @@ window.toggleCareer = function(careerKey) {
   const idx = selectedCareers.indexOf(careerKey);
   
   if (idx > -1) {
-    // If already chosen, remove it unconditionally
     selectedCareers.splice(idx, 1);
   } else {
-    // Global guard: Cap maximum active selections at 2
     if (selectedCareers.length >= 2) return;
 
     const [id1, id2] = builderSel;
 
-    // Enforce bucket limits only when two distinct archetypes are selected
     if (id1 && id2 && id1 !== id2) {
       if (selectedCareers.length === 1) {
         const existingKey = selectedCareers[0];
@@ -626,14 +620,12 @@ window.toggleCareer = function(careerKey) {
         const c1 = ARCH_CAREERS[id1] || [];
         const c2 = ARCH_CAREERS[id2] || [];
         
-        // Categorize career items based on data arrays
         const isShared = (k) => c1.includes(k) && c2.includes(k);
         const isPrimaryOnly = (k) => c1.includes(k) && !c2.includes(k);
         
         const existingType = isShared(existingKey) ? 'common' : (isPrimaryOnly(existingKey) ? 'primary' : 'secondary');
         const newType = isShared(careerKey) ? 'common' : (isPrimaryOnly(careerKey) ? 'primary' : 'secondary');
         
-        // Block doubling down on exclusive pools (No P+P or S+S), but ALLOW C+C (Shared)
         if (existingType === newType && existingType !== 'common') return;
       }
     }
@@ -641,7 +633,6 @@ window.toggleCareer = function(careerKey) {
     selectedCareers.push(careerKey);
   }
 
-  // Re-render components to propagate structural class layout updates
   renderBuilderResult();
   if (activeCharId) {
     const c = CHARS.find(ch => ch.id === activeCharId);
