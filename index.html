@@ -83,15 +83,13 @@ body {
   letter-spacing: .3em;
 }
 
-/* Forces the side-by-side layout permanently, ignoring screen width */
 .two-col {
   display: grid;
   grid-template-columns: 1.3fr 1.5fr;
   min-height: 600px;
-  gap: 0; /* Keeps the clean interior dividing lines intact */
+  gap: 0;
 }
 
-/* Ensure the dividing line stays consistent */
 .panel-left {
   border-right: 1.5px solid var(--rule);
   border-bottom: none;
@@ -99,10 +97,6 @@ body {
 
 .panel {
   padding: 1.75rem 2rem;
-}
-
-.panel-left {
-  border-right: 1.5px solid var(--rule);
 }
 
 .panel-title {
@@ -392,7 +386,7 @@ body {
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 2px;
-  border: 1px dashed #8b2020;
+  border: 1px solid #8b2020;
   background: #f9e8e8;
   color: #5a1010;
   cursor: pointer;
@@ -560,10 +554,10 @@ body {
       <div class="panel-title">Archetype Matrix</div>
       
       <div class="matrix-container">
-        <div class="axis-label-x">✦ Archetype 2 (Columns) ✦</div>
+        <div class="axis-label-x">✦ Secondary Archetype (Columns) ✦</div>
         
         <div class="matrix-wrapper-inner">
-          <div class="axis-label-y">✦ Archetype 1 (Rows) ✦</div>
+          <div class="axis-label-y">✦ Primary Archetype (Rows) ✦</div>
           
           <div class="matrix-grid" id="archetype-matrix"></div>
         </div>
@@ -654,7 +648,7 @@ const CHARS = [
 
 const ALL_GENRES = ['all', ...new Set(CHARS.map(c => c.genre))];
 
-let builderSel = [null, null]; // [Row = Archetype 1, Column = Archetype 2]
+let builderSel = [null, null]; // [Row = Primary Archetype, Column = Secondary Archetype]
 let activeGenre = 'all';
 let activeCharId = null;
 
@@ -678,7 +672,7 @@ function renderMatrix() {
   corner.className = 'matrix-corner';
   el.appendChild(corner);
 
-  // Render Top Column Headers (Archetype 2 Axis)
+  // Render Top Column Headers (Secondary Archetype Axis)
   ARCH_ORDER.forEach(colId => {
     const a = ARCH[colId];
     const colHdr = document.createElement('button');
@@ -695,7 +689,6 @@ function renderMatrix() {
     colHdr.innerHTML = `<span>${a.name}</span><span class="stat-lbl">${a.stat}</span>`;
     
     colHdr.addEventListener('click', () => {
-      // Clear character anchor when modifying matrix headers directly
       activeCharId = null;
       builderSel[1] = (builderSel[1] === colId) ? null : colId;
       renderMatrix();
@@ -707,7 +700,7 @@ function renderMatrix() {
     el.appendChild(colHdr);
   });
 
-  // Render Rows (Archetype 1 Axis)
+  // Render Rows (Primary Archetype Axis)
   ARCH_ORDER.forEach(rowId => {
     const rArch = ARCH[rowId];
     
@@ -789,11 +782,11 @@ function renderBuilderResult() {
   if (id1 && !id2) {
     const a1 = getA(id1);
     el.innerHTML = `
-      <div class="combo-name">Archetype 1: ${a1.name} Isolated</div>
+      <div class="combo-name">Primary Archetype: ${a1.name} Isolated</div>
       <div class="arch-badges">
-        <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">1st Focus: ${a1.name} · ${a1.stat}</span>
+        <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary Focus: ${a1.name} · ${a1.stat}</span>
       </div>
-      <div class="combo-desc">Focusing on paths requiring you to <strong>${a1.prompt}</strong>. Select an Archetype 2 parameter to secure a compound calling. Character lists are currently filtered for targets matching ${a1.name}.</div>
+      <div class="combo-desc">Focusing on paths requiring you to <strong>${a1.prompt}</strong>. Select a Secondary Archetype parameter to secure a compound calling. Character lists are currently filtered for targets matching ${a1.name}.</div>
       <div class="divider"></div>
       <div><div class="col-label" style="color:${a1.txt}">${a1.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id1]), a1.pill)}</div>
     `;
@@ -803,11 +796,11 @@ function renderBuilderResult() {
   if (!id1 && id2) {
     const a2 = getA(id2);
     el.innerHTML = `
-      <div class="combo-name">Archetype 2: ${a2.name} Isolated</div>
+      <div class="combo-name">Secondary Archetype: ${a2.name} Isolated</div>
       <div class="arch-badges">
-        <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">2nd Focus: ${a2.name} · ${a2.stat}</span>
+        <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary Focus: ${a2.name} · ${a2.stat}</span>
       </div>
-      <div class="combo-desc">Evaluating build tracks built on actions to <strong>${a2.prompt}</strong>. Select an Archetype 1 structural coordinate to intersect. Character list matches are adjusted for ${a2.name}.</div>
+      <div class="combo-desc">Evaluating build tracks built on actions to <strong>${a2.prompt}</strong>. Select a Primary Archetype structural coordinate to intersect. Character list matches are adjusted for ${a2.name}.</div>
       <div class="divider"></div>
       <div><div class="col-label" style="color:${a2.txt}">${a2.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id2]), a2.pill)}</div>
     `;
@@ -827,8 +820,8 @@ function renderBuilderResult() {
 
   const badgeHTML = `
     <div class="arch-badges">
-      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">1st: ${a1.name} · ${a1.stat}</span>
-      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">2nd: ${a2.name} · ${a2.stat}</span>` : ''}
+      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary: ${a1.name} · ${a1.stat}</span>
+      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name} · ${a2.stat}</span>` : ''}
     </div>`;
 
   let careersHTML;
@@ -846,7 +839,7 @@ function renderBuilderResult() {
 
   const statLine = same
     ? `<p class="stat-hint">Primary stat focus: <strong>${a1.stat}</strong> — assign higher starting bonuses here.</p>`
-    : `<p class="stat-hint">Primary layout sequence focus: <strong>${a1.stat}</strong> (Archetype 1) and <strong>${a2.stat}</strong> (Archetype 2).</p>`;
+    : `<p class="stat-hint">Primary layout sequence focus: <strong>${a1.stat}</strong> (Primary Archetype) and <strong>${a2.stat}</strong> (Secondary Archetype).</p>`;
 
   el.innerHTML = `
     <div class="combo-name">${combo.name}</div>
@@ -911,8 +904,6 @@ function renderCharList() {
   
   let list = activeGenre === 'all' ? CHARS : CHARS.filter(c => c.genre === activeGenre);
   
-  // Notice: We don't truncate the visibility of list components when a character itself *drives* the filter
-  // This allows the user to see all options within the category, highlighting cross-filters dynamically.
   const hasMatrixFilter = (builderSel[0] || builderSel[1]);
   const isDrivenByCharacter = activeCharId !== null;
 
@@ -948,12 +939,10 @@ function renderCharList() {
     
     item.onclick = () => { 
       if (isActive) {
-        // Toggle Un-select Execution Path
         activeCharId = null; 
         builderSel = [null, null];
         document.getElementById('char-result').innerHTML = '<p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>';
       } else {
-        // Toggle Select & Cross-Filter Execution Path
         activeCharId = c.id; 
         renderCharResult(c);
         builderSel = [c.archs[0], c.archs[1]];
@@ -991,8 +980,8 @@ function renderCharResult(c) {
     const sharedSec = shared.length ? `<div style="margin-top:.6rem"><div class="col-label">shared</div>${makePills(shared,'background:var(--parchment);border-color:var(--rule);color:var(--ink-faded)')}</div>` : '';
     careersHTML = `
       <div class="careers-cols">
-        <div><div class="col-label" style="color:${a1.txt}">1st: ${a1.name}</div>${makePills(only1, a1.pill)}</div>
-        <div><div class="col-label" style="color:${a2.txt}">2nd: ${a2.name}</div>${makePills(only2, a2.pill)}</div>
+        <div><div class="col-label" style="color:${a1.txt}">Primary: ${a1.name}</div>${makePills(only1, a1.pill)}</div>
+        <div><div class="col-label" style="color:${a2.txt}">Secondary: ${a2.name}</div>${makePills(only2, a2.pill)}</div>
       </div>
       ${sharedSec}`;
   }
@@ -1001,8 +990,8 @@ function renderCharResult(c) {
     <div class="char-r-name">${c.name}</div>
     <div class="char-r-source">${c.source} — <em>${c.pseudo || 'Hero'}</em></div>
     <div class="arch-badges">
-      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">1st: ${a1.name}</span>
-      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">2nd: ${a2.name}</span>` : ''}
+      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary: ${a1.name}</span>
+      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name}</span>` : ''}
     </div>
     <div class="char-r-desc">${c.desc}</div>
     <div class="divider"></div>
@@ -1012,7 +1001,6 @@ function renderCharResult(c) {
   `;
 }
 
-// Initial Run-Loop
 renderMatrix();
 renderBuilderResult();
 renderCharFilters();
