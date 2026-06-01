@@ -1,666 +1,492 @@
+// =========================================================================
+// 1. DATA DICTIONARIES & SCHEMAS (Preserved Archetype & Career Architecture)
+// =========================================================================
+
 const ARCH = {
-  blade:    { name:'Blade',    stat:'STR', prompt:'fight, force, and survive melee',           bg:'var(--blade-bg)',    border:'var(--blade-border)',    txt:'var(--blade-txt)',    mid:'var(--blade-mid)',    pill:'background:var(--blade-bg);border-color:var(--blade-border);color:var(--blade-txt)' },
-  shadow:   { name:'Shadow',   stat:'DEX', prompt:'steal, deceive, and disappear',             bg:'var(--shadow-bg)',   border:'var(--shadow-border)',   txt:'var(--shadow-txt)',   mid:'var(--shadow-mid)',   pill:'background:var(--shadow-bg);border-color:var(--shadow-border);color:var(--shadow-txt)' },
-  endurer:  { name:'Endurer',  stat:'CON', prompt:'outlast, resist, and carry more',           bg:'var(--artisan-bg)',  border:'var(--artisan-border)',  txt:'var(--artisan-txt)',  mid:'var(--artisan-mid)',  pill:'background:var(--artisan-bg);border-color:var(--artisan-border);color:var(--artisan-txt)' },
-  sage:     { name:'Sage',     stat:'INT', prompt:'know, deduce, brew, and cast',              bg:'var(--sage-bg)',     border:'var(--sage-border)',     txt:'var(--sage-txt)',     mid:'var(--sage-mid)',     pill:'background:var(--sage-bg);border-color:var(--sage-border);color:var(--sage-txt)' },
-  wayfarer: { name:'Wayfarer', stat:'WIS', prompt:'track, perceive, and navigate the wild',   bg:'var(--wayfarer-bg)', border:'var(--wayfarer-border)', txt:'var(--wayfarer-txt)', mid:'var(--wayfarer-mid)', pill:'background:var(--wayfarer-bg);border-color:var(--wayfarer-border);color:var(--wayfarer-txt)' },
-  devoted:  { name:'Devoted',  stat:'CHA', prompt:'lead, inspire, and call on higher powers',  bg:'var(--devoted-bg)',  border:'var(--devoted-border)',  txt:'var(--devoted-txt)',  mid:'var(--devoted-mid)',  pill:'background:var(--devoted-bg);border-color:var(--devoted-border);color:var(--devoted-txt)' },
-};
-
-const ARCH_ORDER = ['blade','shadow','endurer','sage','wayfarer','devoted'];
-
-// DIRECTION-SENSITIVE MATRIX — all 36 cells unique
-// Key: 'PRIMARY-SECONDARY' (Row = Primary, Column = Secondary)
-const MATRIX = {
-  // ── DIAGONALS ────────────────────────────────────────────────────────────
-  'blade-blade':       { name:'the veteran',          desc:'All you know is the fight. Hard-won scars and harder-won lessons. You have been hit by everything and you are still here.',                                                                       eg:'Jaime Lannister, Conan, the old soldier who should have died ten years ago, a retired pit champion' },
-  'shadow-shadow':     { name:'the ghost',             desc:'You barely exist. False names, false faces, false trails. You are whoever the moment requires, and when it is over, you were never there.',                                                       eg:'a master spy, a con artist at the peak of their game, a thief who has never once been seen' },
-  'endurer-endurer':   { name:'the survivor',          desc:'You do not overcome hardship. You outlast it. Cold, poison, starvation, injury — you absorb everything and keep moving. You are the last one left.',                                             eg:'a castaway who walked home, a prisoner who outlasted their captors, a hermit who has not been warm in a decade' },
-  'sage-sage':         { name:'the scholar',           desc:'Knowledge is power and you intend to have all of it. You see patterns others dismiss as noise. You are probably right and probably insufferable about it.',                                        eg:'a wizard past their prime, an archivist with an agenda, a polymath who never left the tower' },
-  'wayfarer-wayfarer': { name:'the wanderer',          desc:'The road is your home. You know every kind of country and how to read it. You do not pass through the wilderness — you live in it.',                                                               eg:'a lone wanderer, a scout who stopped reporting in, a hermit who moves rather than stays' },
-  'devoted-devoted':   { name:'the true believer',     desc:'Everything you do, you do in service to something larger than yourself. Your patron, cause, or creed is not a tool — it is the point. This is either very noble or very dangerous.',              eg:'a zealot with genuinely good intentions, a wandering saint, a high priest who has seen too much to doubt' },
-
-  // ── BLADE PRIMARY ────────────────────────────────────────────────────────
-  'blade-shadow':      { name:'the skirmisher',        desc:'You fight dirty. Steel and misdirection working together — feints, improvised weapons, sand in the eyes. You do not win fights cleanly; you win them decisively.',                                eg:'Bronn of the Blackwater, a cynical mercenary who fights to win, an arena fighter who has no honor and no wounds' },
-  'blade-endurer':     { name:'the iron wall',         desc:'You absorb punishment that would break anyone else and keep fighting. You are not fast and not subtle — you are the last person standing at the end of a long, ugly engagement.',                  eg:'a siege anchor, a shield-bearer who holds the line, a pit fighter who just will not go down' },
-  'blade-sage':        { name:'the war-scholar',       desc:'You study your enemies before you meet them. Combat is a problem with a correct solution and you work it out in advance. If you cannot, you adapt faster than they do.',                           eg:'a general who leads from the front, a warrior-monk who reads battle like scripture, a duelist who fights twice — once on paper, once in the yard' },
-  'blade-wayfarer':    { name:'the warden',            desc:'You fight in the field, not on formal ground. You read terrain the way other soldiers read formations and use it as a weapon. The wild is your tactical advantage.',                               eg:'Aragorn as Strider, a border-guard who knows every pass, a ranger who has been at war with the forest for a decade' },
-  'blade-devoted':     { name:'the templar',           desc:'Your sword is consecrated to a higher cause. You are a frontline crusader — violence as direct expression of holy decree, sovereign law, or ancient oath. Faith that can split armor.',            eg:'a paladin who has made hard choices, a holy executioner, a knight-militant bound by blood oaths' },
-
-  // ── SHADOW PRIMARY ───────────────────────────────────────────────────────
-  'shadow-blade':      { name:'the knife in the dark', desc:'You do not trade blows across a field. You slip past defenses and settle the matter with a single precise strike before anyone knows the fight has started. Violence as surgery.',                 eg:'an assassin-for-hire with a code, a syndicate cleaner, a duelist who never gives their target a fair chance' },
-  'shadow-endurer':    { name:'the escape artist',     desc:'You get caught. That is part of the plan. What sets you apart is that you always get out — through pain, improvisation, and sheer refusal to stay where they put you.',                            eg:'a thief who treats prison as a revolving door, an operative who can walk away from anything, a spy who has been tortured and talked their way free' },
-  'shadow-sage':       { name:'the mastermind',        desc:'You do not improvise. You prepare. Every identity is tailored, every exit pre-arranged, every guard bribed in advance. No plan survives contact with the enemy — except yours.',                   eg:'a spymaster, a high-stakes con artist who has never been caught, a black-market archivist who sells leverage' },
-  'shadow-wayfarer':   { name:'the outrider',          desc:'You use terrain the way others use shadows — as cover, corridor, and escape route. You move fast and quiet through country that stops everyone else.',                                             eg:'a smuggler who knows every back-road and hidden ford, a poacher who knows where the wardens sleep, a frontier scout who reports to no one' },
-  'shadow-devoted':    { name:'the silent hand',       desc:'You carry out the unacknowledged will of your faith or patron from the dark. You are the shadow the altar casts. Whether your belief is genuine is between you and your god.',                     eg:'a spy for the church, an assassin for a trickster cult, a saboteur whose order cannot publicly acknowledge them' },
-
-  // ── ENDURER PRIMARY ──────────────────────────────────────────────────────
-  'endurer-blade':     { name:'the juggernaut',        desc:'You absorb the hit. Then you hit back. You are not a finesse fighter — you are a force of nature that has decided to move in one direction and has not stopped yet.',                               eg:'a berserker who cannot be put down, a wrestler who fights through broken ribs, a soldier who took three arrows and kept the wall' },
-  'endurer-shadow':    { name:'the feral',             desc:'You survive by instinct and speed. Where others plan, you react. Cornered, you become unpredictable. You are difficult to catch, difficult to hold, and difficult to kill.',                       eg:'a wilderness fugitive, a street rat who grew up hard, a scout who operates too far from support to do anything but adapt' },
-  'endurer-sage':      { name:'the field scholar',     desc:'You go where the knowledge is, no matter the conditions. Cold, altitude, hostile territory — you endure it because what you find there is worth it. You come back with things no one else has.',    eg:'Indiana Jones, a field physician who works in war zones, a naturalist who winters in the mountains to study migration' },
-  'endurer-wayfarer':  { name:'the deepwalker',        desc:'You go further than anyone else and you come back. Your body is built for distance and deprivation; your instincts keep you alive in places where maps run out.',                                   eg:'a long-range pathfinder, an explorer who crossed the desert on foot, a diver who holds their breath too long and always surfaces' },
-  'endurer-devoted':   { name:'the immovable',         desc:'Your faith is structural. It does not inspire — it anchors. You are the one the party looks to when everything is falling apart, not because you have answers, but because you have not moved.',    eg:'a confessor who absorbed a century of other people\'s despair and kept going, a martyr-in-waiting who refuses to be one' },
-
-  // ── SAGE PRIMARY ─────────────────────────────────────────────────────────
-  'sage-blade':        { name:'the spellsword',        desc:'You picked up a weapon to protect your work. You see combat as a technical problem and magic as a force multiplier. You are not the strongest fighter in the room — but you are the most prepared.',  eg:'an occult investigator, a scholar who guards forbidden grimoires with steel, an academic duelist who fights with annotations in the margins' },
-  'sage-shadow':       { name:'the apostate',          desc:'You use your expertise to take things that are not yours. Research methods to locate the target; tradecraft to extract it. You are a thief who knows exactly what they are stealing and why it matters.', eg:'a defrocked alchemist who sells what the guild will not, an archivist who forges lineage papers, a thief of library vaults' },
-  'sage-endurer':      { name:'the artificer',         desc:'You build things that last because you understand the principles behind them. Theory translated into durable physical objects — engines, instruments, fortifications, potions that actually work.',     eg:'a clockwork engineer, a siege architect, a physician who designs their own instruments, a brewer whose recipes are documented' },
-  'sage-wayfarer':     { name:'the field naturalist',  desc:'You systematize the world. You venture out of towers to catalog venomous flora, track migrations, analyze geological fractures, and document things that have no names yet.',                         eg:'an academic cartographer, a toxicologist collecting field samples, a naturalist who names the creature that tries to eat them' },
-  'sage-devoted':      { name:'the theurgist',         desc:'Magic, faith, and reason are not separate fields for you. They are the same engine viewed from different angles. You study miracles the way an engineer studies a bridge — to understand the load.',    eg:'an alchemist who prays over the crucible, a cleric who knows too much to be orthodox, Van Helsing' },
-
-  // ── WAYFARER PRIMARY ─────────────────────────────────────────────────────
-  'wayfarer-blade':    { name:'the beast-slayer',      desc:'You track dangerous quarry and close with it. You treat dangerous creatures as apex predators to study, trap, and fight on their own terms — not yours.',                                           eg:'a monster hunter, a deep-woods tracker who had to learn to fight when the thing fought back, Kraven the Hunter' },
-  'wayfarer-shadow':   { name:'the poacher',           desc:'You take what the crown says belongs to them. You move through the forest silently, set camouflaged snares, and disappear before the wardens know you were there.',                                  eg:'Robin Hood, a forest outlaw, a grey-market trapper who sells what they catch to the wrong people' },
-  'wayfarer-endurer':  { name:'the pathfinder',        desc:'You navigate extreme terrain and you survive it. Other scouts map what is safe; you map what is not, because someone has to know where the passes are before the army uses them.',                    eg:'a long-range wilderness scout, a mountain guide who has lost toes and keeps climbing, a sailor who charts the dangerous coast' },
-  'wayfarer-sage':     { name:'the cartographer',      desc:'You observe the world systematically. Every hex has a theory; every creature deserves a name. You perceive things and then categorize them, because knowledge without order is noise.',               eg:'Lara Croft, a naturalist-explorer, a geographer who maps anomalous zones and annotates what killed their predecessors' },
-  'wayfarer-devoted':  { name:'the oracle',            desc:'You read the world as a text. Weather, terrain, the behavior of animals — all of it is meaningful. You perceive signs and you speak their meaning to those who will listen, or will not.',            eg:'a seer who reads the land, a wandering prophet who is usually right, a shaman whose omens have a frustrating tendency to be correct' },
-
-  // ── DEVOTED PRIMARY ───────────────────────────────────────────────────────
-  'devoted-blade':     { name:'the zealot',            desc:'Your conviction has an edge. You do not wait for the institution to act — you pick up the iron yourself. Whether that is justice or fanaticism depends on who is asking.',                           eg:'an inquisitor who hunts personally, a religious enforcer, a warrior vindicating a broken oath in front of God' },
-  'devoted-shadow':    { name:'the heretic',           desc:'You keep a banned faith alive. Cells, coded messages, midnight rites — you operate below the surface of an oppressive order and you have learned to be impossible to find.',                         eg:'a hidden priest of a destroyed order, a revolutionary whose ideology has been outlawed, John Constantine' },
-  'devoted-endurer':   { name:'the pastor',            desc:'You serve your community in body as well as spirit. You mend bones, patch roofs, grow the herbs you use, and hold small villages together through things that would scatter everyone else.',           eg:'a village priest who is also the doctor, Friar Tuck, a frontier preacher who works the fields alongside their congregation' },
-  'devoted-sage':      { name:'the monastic',          desc:'You are the keeper of your order\'s memory. Lineages, relics, old accounts — you guard the institutional knowledge that tells your flock who they are and what they are for.',                        eg:'a high church scholar, Brother Cadfael, a theologian who has read everything and believes it' },
-  'devoted-wayfarer':  { name:'the pilgrim',           desc:'You walk a long road for a higher purpose. The journey is the discipline. You have seen more of the world than most priests and more of faith than most travelers, and neither has made you stop.',    eg:'a wandering monk, a desert prophet, a traveling healer, a palmer far from any holy land' },
+  blade:    { name: 'Blade',    stat: 'STR', prompt: 'fight, force, and survive melee',           bg: 'var(--blade-bg)',    border: 'var(--blade-border)',    txt: 'var(--blade-txt)',    mid: 'var(--blade-mid)',    pill: 'background:var(--blade-bg);border-color:var(--blade-border);color:var(--blade-txt)' },
+  shadow:   { name: 'Shadow',   stat: 'DEX', prompt: 'steal, deceive, and disappear',             bg: 'var(--shadow-bg)',   border: 'var(--shadow-border)',   txt: 'var(--shadow-txt)',   mid: 'var(--shadow-mid)',   pill: 'background:var(--shadow-bg);border-color:var(--shadow-border);color:var(--shadow-txt)' },
+  endurer:  { name: 'Endurer',  stat: 'CON', prompt: 'outlast, resist, and carry more',           bg: 'var(--artisan-bg)',  border: 'var(--artisan-border)',  txt: 'var(--artisan-txt)',  mid: 'var(--artisan-mid)',  pill: 'background:var(--artisan-bg);border-color:var(--artisan-border);color:var(--artisan-txt)' },
+  sage:     { name: 'Sage',     stat: 'INT', prompt: 'know, deduce, brew, and cast',              bg: 'var(--sage-bg)',     border: 'var(--sage-border)',     txt: 'var(--sage-txt)',     mid: 'var(--sage-mid)',     pill: 'background:var(--sage-bg);border-color:var(--sage-border);color:var(--sage-txt)' },
+  wayfarer: { name: 'Wayfarer', stat: 'WIS', prompt: 'scout, track, survive, and shoot',          bg: 'var(--wayfarer-bg)', border: 'var(--wayfarer-border)', txt: 'var(--wayfarer-txt)', mid: 'var(--wayfarer-mid)', pill: 'background:var(--wayfarer-bg);border-color:var(--wayfarer-border);color:var(--wayfarer-txt)' },
+  devoted:  { name: 'Devoted',  stat: 'CHA', prompt: 'lead, command, channel, and persuade',      bg: 'var(--devoted-bg)',  border: 'var(--devoted-border)',  txt: 'var(--devoted-txt)',  mid: 'var(--devoted-mid)',  pill: 'background:var(--devoted-bg);border-color:var(--devoted-border);color:var(--devoted-txt)' }
 };
 
 const ARCH_CAREERS = {
-  blade: [
-    'assassin', 'bandit', 'beast tamer', 'blacksmith', 'butcher', 'fence', 'gambler', 
-    'grave robber', 'guard', 'headsman', 'inquisitor', 'jailer', 'kidnapper', 'knight', 
-    'pit fighter', 'pirate', 'saboteur', 'soldier', 'squire', 'thug', 'torturer', 'watchman'
-  ],
-  shadow: [
-    'acrobat', 'actor', 'assassin', 'bandit', 'barber', 'burglar', 'charlatan', 'cobbler', 
-    'coachman', 'courtier', 'cutpurse', 'fence', 'jester', 'jeweler', 'kidnapper', 'locksmith', 
-    'peddler', 'puppeteer', 'rat catcher', 'smuggler', 'spy', 'tailor', 'tattooist', 'thieftaker', 'thug'
-  ],
-  endurer: [
-    'baker', 'blacksmith', 'boatman', 'brewer', 'candlemaker', 'carpenter', 'cobbler', 
-    'cook', 'dyer', 'fisherman', 'gravedigger', 'groom', 'hermit', 'hunter', 'innkeeper', 
-    'mason', 'miner', 'pilgrim', 'prospector', 'sailor', 'sculptor', 'servant', 'shepherd', 
-    'shipwright', 'trapper'
-  ],
-  wayfarer: [
-    'beast tamer', 'beekeeper', 'boatman', 'courier', 'explorer', 'falconer', 'fisherman', 
-    'gamekeeper', 'gardener', 'groom', 'hermit', 'hunter', 'miner', 'naturalist', 'pilgrim', 
-    'poacher', 'prospector', 'sailor', 'scout', 'shepherd', 'shipwright', 'trapper', 'woodcutter'
-  ],
-  sage: [
-    'alchemist', 'antiquarian', 'arcanist', 'architect', 'astrologer', 'bookbinder', 
-    'brewer', 'dyer', 'folklorist', 'herbalist', 'inquisitor', 'investigator', 'naturalist', 
-    'oracle', 'painter', 'philosopher', 'physician', 'playwright', 'scribe'
-  ],
-  devoted: [
-    'acolyte', 'actor', 'courtier', 'cultist', 'hermit', 'inquisitor', 'jester', 'knight', 
-    'lawyer', 'merchant', 'musician', 'officer', 'oracle', 'orator', 'painter', 'peddler', 
-    'philosopher', 'pilgrim', 'poet', 'priest', 'sculptor', 'servant', 'singer'
-  ]
+  blade:    ['Mercenary', 'Gladiator', 'Blacksmith', 'Guard', 'Slayer', 'Knight'],
+  shadow:   ['Cutpurse', 'Burglar', 'Assassin', 'Smuggler', 'Spy', 'Charlatan'],
+  endurer:  ['Miner', 'Laborer', 'Explorer', 'Mariner', 'Gladiator', 'Blacksmith'],
+  sage:     ['Alchemist', 'Scribe', 'Apothecary', 'Astrologer', 'Hedge Wizard', 'Scholar'],
+  wayfarer: ['Tracker', 'Hunter', 'Poacher', 'Guide', 'Explorer', 'Mariner'],
+  devoted:  ['Inquisitor', 'Preacher', 'Cultist', 'Templar', 'Hedge Wizard', 'Scholar']
 };
 
 const CAREER_ITEMS = {
-  'acrobat':      ['Rope (50ft)', 'Chalk bag', 'Tightrope pole'],
-  'acolyte':      ['Holy water', 'Incense burner', 'Hymnal'],
-  'actor':        ['Costume suit', 'Makeup palette', 'Script scroll'],
-  'alchemist':    ['Alchemist\'s fire', 'Glass alembic', 'Mortar & pestle'],
-  'antiquarian':  ['Old coin collection', 'Magnifying glass', 'Antique map'],
-  'arcanist':     ['Blank spellbook', 'Chalk sticks', 'Inkwell & quill'],
-  'architect':    ['Blueprint rolls', 'Plumb line', 'Drawing compass'],
-  'assassin':     ['Vial of poison', 'Garrote wire', 'Disguise kit'],
-  'astrologer':   ['Star charts', 'Brass telescope', 'Ephemeris almanac'],
-  'baker':        ['Heavy rolling pin', 'Flour sack', 'Stained apron'],
-  'bandit':       ['Face hood', 'Iron crowbar', 'Stolen coin pouch'],
-  'barber':       ['Straight razor', 'Scented pomade', 'Hand mirror'],
-  'beast tamer':  ['Leather whip', 'Raw meat sack', 'High-frequency whistle'],
-  'beekeeper':    ['Smoke blower', 'Honey jar', 'Protective mesh veil'],
-  'blacksmith':   ['Heavy tongs', 'Forging hammer', 'Leather apron'],
-  'boatman':      ['Wood oar', 'Canvas tarp', 'Twine spool'],
-  'bookbinder':   ['Leather scraps', 'Glue pot', 'Bone folder tool'],
-  'brewer':       ['Small cask of ale', 'Glass hydrometer', 'Yeast packet'],
-  'burglar':      ['Lockpick set', 'Diamond glass cutter', 'Dark wool cloak'],
-  'butcher':      ['Heavy cleaver', 'Meat hook', 'Sharpening stone'],
-  'candlemaker':  ['Tallow chunk', 'Wick spool', 'Metal dipping rod'],
-  'carpenter':    ['Hand saw', 'Claw hammer', 'Iron square ruler'],
-  'charlatan':    ['Flamboyant costume', 'Fake elixir bottle', 'Forged degree'],
-  'coachman':     ['Driving whip', 'Oil lantern', 'Carriage grease tub'],
-  'cobbler':      ['Stitching awl', 'Shoe leather soles', 'Wooden last'],
-  'cook':         ['Iron pot', 'Stirring ladle', 'Rare spice pouch'],
-  'courier':      ['Leather satchel', 'Wax seal stamp', 'Iron-shod walking stick'],
-  'courtier':     ['Gold signet ring', 'Silk handkerchief', 'Vial of perfume'],
-  'cultist':      ['Ceremonial dagger', 'Ritual robes', 'Unholy amulet'],
-  'cutpurse':     ['Small shears', 'Leather purse hook', 'Coil of copper wire'],
-  'dyer':         ['Mordant vat jar', 'Concentrated dye flask', 'Stained leather gloves'],
-  'explorer':     ['Brass sextant', 'Collapsible spyglass', 'Magnetic compass'],
-  'falconer':     ['Thick leather gauntlet', 'Bird hood', 'Training whistle'],
-  'fence':        ['Magnifying lens', 'Precision small scale', 'Secret ledger'],
-  'fisherman':    ['Fishing rod', 'Tackle box', 'Braided net'],
-  'folklorist':   ['Iron protective charm', 'Field notebook', 'Rare mythos manuscript'],
-  'gambler':      ['Deck of cards', 'Pair of bone dice', 'Leather betting cup'],
-  'gamekeeper':   ['Snare wire coil', 'Signal whistle', 'Bullseye lantern'],
-  'gardener':     ['Hand trowel', 'Canvas seed pouch', 'Pruning shears'],
-  'grave robber': ['Rusty shovel', 'Dark lantern', 'Heavy canvas sack'],
-  'gravedigger':  ['Trenching shovel', 'Flat spade', 'Linen burial shroud'],
-  'groom':        ['Curry comb', 'Oats burlap bag', 'Leather halter'],
-  'guard':        ['Iron halberd', 'Livery chest badge', 'Alert whistle'],
-  'headsman':     ['Executioner\'s axe', 'Black execution hood', 'Coarse whetstone'],
-  'herbalist':    ['Dried medicinal herbs', 'Harvesting sickle', 'Herb identification manual'],
-  'hermit':       ['Gnarled wooden staff', 'Patched cloak', 'Carved holy symbol'],
-  'hunter':       ['Hunting shortbow', 'Quiver with 20 arrows', 'Skinning knife'],
-  'innkeeper':    ['Brass keg tap', 'Guest ledger book', 'Heavy master keyring'],
-  'inquisitor':   ['Iron branding rod', 'Heresy manual', 'Consecrated holy symbol'],
-  'investigator': ['Case journal', 'Inkpen & case', 'Iron manacles'],
-  'jailer':       ['Heavy dungeon keys', 'Chain manacles', 'Weighted truncheon'],
-  'jester':       ['Motley garb & bells', 'Three juggling balls', 'Pig-bladder stick'],
-  'jeweler':      ['Eye loupe', 'Jeweler\'s micro-hammer', 'Velvet display pad'],
-  'kidnapper':    ['Large burlap sack', 'Hemp rope (50ft)', 'Linen gag fabric'],
-  'knight':       ['Polished longsword', 'Heraldic heater shield', 'Riding spurs'],
-  'lawyer':       ['Heavy law tome', 'Legal brief scrolls', 'Inkwell & blotter'],
-  'locksmith':    ['Precision pick set', 'Skeleton keys', 'Fine oil can'],
-  'mason':        ['Mortar trowel', 'Stone chisel', 'Heavy wooden mallet'],
-  'merchant':     ['Transaction ledger', 'Wooden abacus', 'Handheld brass scales'],
-  'miner':        ['Heavy pickaxe', 'Oil head-lamp', 'Refining oil flask'],
-  'musician':     ['Travel instrument', 'Sheet music folio', 'Metal tuning fork'],
-  'naturalist':   ['Specimen collection jar', 'Butterfly net', 'Flora & fauna field guide'],
-  'officer':      ['Regimental uniform coat', 'Command whistle', 'Ceremonial saber'],
-  'oracle':       ['Tarot card deck', 'Incense burner burner', 'Cloudy crystal orb'],
-  'orator':       ['Proclamation scroll', 'Throat lozenges', 'Podium script sheets'],
-  'painter':      ['Wooden travel easel', 'Fine paint brushes', 'Mixing palette'],
-  'peddler':      ['Display crate', 'Cheap glass trinkets', 'Hand call bell'],
-  'philosopher':  ['Writing quill', 'Heavy philosophical book', 'Ceramic inkpot'],
-  'physician':    ['Bone saw', 'Fine scalpel', 'Rolls of clean medical bandages'],
-  'pilgrim':      ['Iron-tipped walking staff', 'Religious relic pouch', 'Sovereign letter of passage'],
-  'pirate':       ['Heavy cutlass', 'Leather eye patch', 'Fortified rum flask'],
-  'pit fighter':  ['Spiked cestus', 'Weighted throwing net', 'Barbed trident'],
-  'playwright':   ['Quill kit', 'Blank parchment rolls', 'Tragedy/Comedy theater masks'],
-  'poacher':      ['Animal masking scent', 'Poaching bow', 'Quiver with 20 arrows'],
-  'poet':         ['Travel inkwell', 'Parchment anthology rolls', 'Decorative ribbon bindings'],
-  'priest':       ['Vial of holy water', 'Liturgical holy book', 'Ceremonial vestments'],
-  'prospector':   ['Iron gold pan', 'Geological rock hammer', 'Sifting sieve'],
-  'puppeteer':    ['Carved marionette', 'Small frame curtain', 'String repair spool'],
-  'rat catcher':  ['Small wire cage', 'Terrier training whistle', 'Sack of arsenic poison'],
-  'saboteur':     ['Waterproof tinderbox', 'Black powder horn', 'Slow-burning fuse wire'],
-  'sailor':       ['Iron marlinspike', 'Tar waterproofing pot', 'Reinforced sea chest'],
-  'scout':        ['High-power spyglass', 'Camouflage foliage cloak', 'Waterproof map case'],
-  'scribe':       ['Black inkwell', 'Wax writing tablets', 'Iron stylus tool'],
-  'sculptor':     ['Marble chisel', 'Heavy mallet', 'Wet clay lump'],
-  'servant':      ['Silver serving platter', 'Feather duster', 'Tailored livery uniform'],
-  'shepherd':     ['Wooden shepherd\'s crook', 'Sheepdog whistle', 'Iron wool shears'],
-  'shipwright':   ['Hand adze tool', 'Caulking iron mallet', 'Oakum packing bundle'],
-  'singer':       ['Vocal tuning fork', 'Lyric song sheet', 'Honey throat lozenges'],
-  'smuggler':     ['False-bottomed cask', 'Darkened shutter lantern', 'Black-market bribe coins'],
-  'soldier':      ['Iron spear', 'Regimental uniform tunic', 'Hardtack iron rations'],
-  'spy':          ['Bag of caltrops', 'Vial of contact poison', 'Forged identity papers'],
-  'squire':       ['Shield oil & rags', 'Fine whetstone', 'Heraldic tabard shirt'],
-  'tailor':       ['Fabric shears', 'Needle & thread spools', 'Fabric tape measure'],
-  'tattooist':    ['Bone inking needles', 'Pigment ink pots', 'Design sketch book'],
-  'thieftaker':   ['Official bounty poster', 'Heavy iron manacles', 'Leather sap'],
-  'thug':         ['Weighted lead cosh', 'Brass knuckles', 'Face bandana'],
-  'torturer':     ['Iron thumbscrews', 'Rusted iron pincers', 'Heavy leather work apron'],
-  'trapper':      ['Toothed bear trap', 'Wood pelt stretcher', 'Skinning tool knife'],
-  'watchman':     ['Oil lantern', 'Iron-shod polearm', 'Wooden alarm rattle'],
-  'woodcutter':   ['Felling axe', 'Splitting wedge', 'Coarse sharpening stone']
+  'mercenary':    ['Halberd', 'Chainmail Coif', 'Gambeson'],
+  'gladiator':    ['Trident', 'Net', 'Light Shield'],
+  'blacksmith':   ['Warhammer', 'Heavy Apron (Leather)', 'Tongs & Charcoal'],
+  'guard':        ['Spear', 'Crossbow', 'Lantern & Oil'],
+  'slayer':       ['Greatsword', 'Trophy Trophy Head', 'Whetstone'],
+  'knight':       ['Longsword', 'Kite Shield', 'Tabard'],
+  'cutpurse':     ['Dagger', 'Leather Armor', 'Crowbar'],
+  'burglar':      ['Lockpicks', 'Dark Cloak', '10ft String & Bell'],
+  'assassin':     ['Blowgun', 'Poison (1 dose)', 'Garrote'],
+  'smuggler':     ['Shortsword', 'False-bottomed Sack', 'Grappling Hook'],
+  'spy':          ['Disguise Kit', 'Forged Papers', 'Signet Ring'],
+  'charlatan':    ['Loaded Dice', 'Marked Cards', 'Elixir of Health (Fake)'],
+  'miner':        ['Pickaxe', 'Shovel', 'Headlamp & Oil'],
+  'laborer':      ['Sledgehammer', 'Heavy Gloves', 'Spikes & Pitons'],
+  'explorer':     ['Compass', 'Spyglass', 'Map Cases'],
+  'mariner':      ['Cutlass', 'Fishing Net', 'Tar Flask'],
+  'alchemist':    ['Acid Vial', 'Flint & Steel', 'Mortar & Pestle'],
+  'scribe':       ['Ink & Quills', 'Blank Parchment Rolls', 'Wax Seal Kit'],
+  'apothecary':   ['Healing Herbs', 'Bandages', 'Pestle'],
+  'astrologer':   ['Star Charts', 'Astrolabe', 'Chalk'],
+  'hedge wizard': ['Component Pouch', 'Strange Herbs', 'Wooden Staff'],
+  'scholar':      ['Ancient Tome', 'Magnifying Glass', 'Journal'],
+  'tracker':      ['Longbow', 'Hunting Trap', 'Caltrops'],
+  'hunter':       ['Shortbow', 'Skinning Knife', 'Animal Scent Camouflage'],
+  'poacher':      ['Sling', 'Snare Wire', 'Camouflage Net'],
+  'guide':        ['Walking Staff', 'Signal Horn', 'Climber\'s Kit'],
+  'inquisitor':   ['Branding Iron', 'Holy Water', 'Chains'],
+  'preacher':     ['Holy Symbol', 'Censer & Incense', 'Book of Hymns'],
+  'cultist':      ['Sacrificial Ritual Dagger', 'Ceremonial Mask', 'Black Candles'],
+  'templar':      ['Mace', 'Scale Mail', 'Reliquary Container']
 };
 
-const CHARS = [
-  { id:'conan',       name:'Conan',              source:'R.E. Howard',        genre:'sword-sorcery', archs:['blade','wayfarer'], pseudo:'the ranger', desc:'Wandering barbarian — as comfortable leading a war-band as surviving alone in the wilderness. Fights first, thinks later, survives always.', careers:{ blade:['soldier','pit fighter','bandit','guard'], wayfarer:['hunter','scout','trapper','pirate'] }, note:'STR and WIS. CON third — you need those item slots.' },
-  { id:'aragorn',     name:'Aragorn',             source:'Tolkien',             genre:'fantasy',       archs:['blade','wayfarer'], pseudo:'the ranger', desc:'A king who walks as a wanderer. Trained warrior, skilled tracker, and reluctant leader who knows every corner of a dangerous world.', careers:{ blade:['soldier','knight','squire','guard'], wayfarer:['hunter','scout','herbalist','courier'] }, note:'STR and WIS split. Take herbalist — it fits perfectly and gives you the foraging advantage.' },
-  { id:'geralt',      name:'Geralt',              source:'Sapkowski',           genre:'fantasy',       archs:['blade','sage'],     pseudo:'the war-scholar', desc:'A professional monster hunter who studies his quarry before he fights it. Alchemy, precise swordwork, and a deep knowledge of things that want to kill you.', careers:{ blade:['assassin','soldier','thieftaker','headsman'], sage:['alchemist','herbalist','investigator','folklorist'] }, note:'STR and INT. Alchemist gives the brewing setup; investigator gives the journal and manacles for contracts.' },
-  { id:'fafhrd',      name:'Fafhrd',              source:'Leiber',              genre:'sword-sorcery', archs:['blade','shadow'],   pseudo:'the knife in the dark', desc:'Half-barbarian, half-thief, entirely unpredictable. Big enough to fight anything, charming enough to talk his way out afterward — usually.', careers:{ blade:['soldier','pirate','pit fighter','bandit'], shadow:['acrobat','gambler','actor','smuggler'] }, note:'STR primary. A point in CHA for the performer side. Fafhrd is the more openly reckless of the two.' },
-  { id:'mouser',      name:'Gray Mouser',         source:'Leiber',              genre:'sword-sorcery', archs:['shadow','blade'],   pseudo:'the knife in the dark', desc:'Nimble, cunning, armed with a blade he calls Scalpel. A failed wizard\'s apprentice who redirected his education toward theft and surviving Fafhrd\'s plans.', careers:{ shadow:['cutpurse','burglar','acrobat','fence'], blade:['assassin','gambler','thug','locksmith'] }, note:'DEX primary, a point in INT for the arcane dabbling. Where Fafhrd hits hard, he hits fast.' },
-  { id:'elric',       name:'Elric',               source:'Moorcock',            genre:'sword-sorcery', archs:['blade','devoted'],  pseudo:'the war-priest', desc:'Last emperor of a dying civilization, bound to a soul-drinking black sword and the chaos gods that empower it. Reluctant, doomed, magnificent.', careers:{ blade:['soldier','knight','headsman','squire'], devoted:['cultist','oracle','arcanist','philosopher'] }, note:'CHA primary — his power comes from his patron relationship, not his frail body. A point in STR keeps the sword swinging.' },
-  { id:'gandalf',     name:'Gandalf',             source:'Tolkien',             genre:'fantasy',       archs:['devoted','sage'],   pseudo:'the theurgist', desc:'A wandering wizard who moves the pieces of the world without anyone quite understanding how or why. Ancient, patient, playing a very long game.', careers:{ devoted:['pilgrim','philosopher','oracle','priest'], sage:['arcanist','astrologer','folklorist','antiquarian'] }, note:'CHA and INT split. Pilgrim career is perfect — staff, relic, letter of passage. That\'s basically his whole kit.' },
-  { id:'bilbo',       name:'Bilbo / Frodo',       source:'Tolkien',             genre:'fantasy',       archs:['shadow','wayfarer'],pseudo:'the outrider', desc:'An ordinary person thrust into extraordinary travel. Resourceful, quietly brave, and better at going unnoticed than anyone expects.', careers:{ shadow:['burglar','cutpurse','smuggler','courier'], wayfarer:['pilgrim','scout','hermit','courier'] }, note:'DEX and WIS. Lean into CON for wound slots — they survive by endurance, not combat prowess.' },
-  { id:'indy',        name:'Indiana Jones',       source:'Spielberg / Lucas',   genre:'adventure',     archs:['sage','artisan'],   pseudo:'the artificer', desc:'A professor who sprints through tombs for a living. Deep historical knowledge, practical enough to improvise under fire, surprisingly good in a brawl.', careers:{ sage:['antiquarian','investigator','folklorist','astrologer'], artisan:['architect','carpenter','physician','mason'] }, note:'INT primary — both archetypes run on it. STR second; he punches a lot of Nazis. CON third for the item slots to carry all those artifacts.' },
-  { id:'lara',        name:'Lara Croft',          source:'Core Design',         genre:'adventure',     archs:['wayfarer','sage'],  pseudo:'the learned explorer', desc:'An archaeologist who operates in the field, alone, under fire. Navigates hostile terrain and hostile history with equal fluency.', careers:{ wayfarer:['explorer','hunter','prospector','scout'], sage:['antiquarian','investigator','naturalist','arcanist'] }, note:'WIS and INT. Explorer career gives sextant and spyglass — exactly right. Hunter adds tent and survival gear.' },
-  { id:'robin',       name:'Robin Hood',          source:'English folklore',    genre:'fantasy',       archs:['wayfarer','shadow'],pseudo:'the outrider', desc:'An outlaw who knows the forest better than the foresters and uses that knowledge to redistribute wealth — selectively.', careers:{ wayfarer:['poacher','gamekeeper','hunter','scout'], shadow:['bandit','burglar','spy','smuggler'] }, note:'WIS primary — the bow runs on WIS in Knave. DEX second. Poacher career: animal scent, bow, 20 arrows.' },
-  { id:'zorro',       name:'Zorro / d\'Artagnan', source:'McCulley / Dumas',    genre:'adventure',     archs:['shadow','blade'],   pseudo:'the knife in the dark', desc:'A duelist with a double life. Noble enough to move in court, dangerous enough to clear a room — and vain enough to leave a calling card.', careers:{ shadow:['acrobat','actor','courtier','gambler'], blade:['soldier','fence','gambler','assassin'] }, note:'DEX primary, CHA second. Courtier covers the social mask; gambler (rapier, cards, dice) covers the duel.' },
-  { id:'bond',        name:'James Bond',          source:'Fleming',             genre:'thriller',      archs:['shadow','sage'],    pseudo:'the operator', desc:'A government assassin with impeccable manners and a talent for being somewhere he shouldn\'t be. Gathers intelligence, eliminates targets, orders something expensive afterward.', careers:{ shadow:['spy','assassin','courtier','smuggler'], sage:['investigator','alchemist','physician','arcanist'] }, note:'DEX and INT. Spy career (caltrops, poison, forged papers). Investigator adds the journal and manacles.' },
-  { id:'odysseus',    name:'Odysseus',            source:'Homer',               genre:'myth',          archs:['shadow','devoted'], pseudo:'the faithful dissembler', desc:'The cleverest man in the room, always. Beloved of a goddess, cursed by a god, determined to get home by any means necessary. The plan always has three layers.', careers:{ shadow:['spy','orator','actor','smuggler'], devoted:['pilgrim','oracle','priest','philosopher'] }, note:'CHA and DEX — he talks and maneuvers his way through everything.' },
-  { id:'vanhelsing',  name:'Van Helsing',         source:'Stoker',              genre:'horror',        archs:['devoted','sage'],   pseudo:'the theurgist', desc:'A scholar of the supernatural who has made it his business to destroy what he studies. Faith and reason are both weapons. So is a stake.', careers:{ devoted:['inquisitor','priest','pilgrim','cultist'], sage:['physician','folklorist','investigator','herbalist'] }, note:'CHA and INT. Priest career gives holy water and stakes out of the box. Physician adds the saw and scalpel.' },
-  { id:'merlin',      name:'Merlin',              source:'Arthurian legend',    genre:'fantasy',       archs:['sage','devoted'],   pseudo:'the theurgist', desc:'A ancient intelligence wearing a wizard\'s disguise. Arranges the shape of kingdoms the way others arrange furniture. The magic is incidental.', careers:{ sage:['arcanist','astrologer','philosopher','antiquarian'], devoted:['oracle','priest','cultist','pilgrim'] }, note:'INT and CHA. Arcanist gives the spellbook; astrologer adds star charts and almanac. Oracle for the tarot deck.' },
-  { id:'sparrow',     name:'Jack Sparrow',        source:'Disney / Verbinski',  genre:'adventure',     archs:['shadow','wayfarer'],pseudo:'the outrider', desc:'A disreputable sailor who is either the luckiest fool alive or a genius pretending to be a fool. Probably both.', careers:{ shadow:['pirate','gambler','smuggler','charlatan'], wayfarer:['sailor','boatman','explorer','scout'] }, note:'DEX and WIS. Charlatan (costume, fake elixir, degree) is too good to pass up.' },
-  { id:'ripley',      name:'Ellen Ripley',        source:'Scott / Cameron',     genre:'sci-fi',        archs:['artisan','blade'],  pseudo:'the pit veteran', desc:'A working professional who survives through practical knowledge, cold-headed problem solving, and the willingness to do whatever the situation requires.', careers:{ artisan:['shipwright','carpenter','watchman','innkeeper'], blade:['soldier','guard','thieftaker','saboteur'] }, note:'INT and STR — the shipwright kit is her technical competence, soldier and saboteur cover the rest. CON third for the extra wound slots she always needs.' },
-  { id:'constantine', name:'John Constantine',    source:'DC / Vertigo',        genre:'horror',        archs:['shadow','devoted'], pseudo:'the faithful dissembler', desc:'Knows evil intimately — often because he caused it. Defeats it through manipulation, debt-collection, and exploiting rules that most people don\'t know exist. His faith is real but it isn\'t clean.', careers:{ shadow:['spy','charlatan','smuggler','cultist'], devoted:['priest','oracle','inquisitor','pilgrim'] }, note:'CHA primary, then split DEX and INT. Cultist career (dagger, ritual robes, amulet) is his kit exactly.' },
-  { id:'cadfael',     name:'Brother Cadfael',     source:'Ellis Peters',        genre:'mystery',       archs:['devoted','sage'],   pseudo:'the theurgist', desc:'A monk who spent half his life as a soldier before finding God — and then found that God had use for a man who understand both herbalism and homicide.', careers:{ devoted:['priest','acolyte','pilgrim','philosopher'], sage:['herbalist','physician','investigator','naturalist'] }, note:'CHA and INT. Herbalist career (herbs, sickle, herb manual) is his primary toolkit.' },
-  { id:'tuck',        name:'Friar Tuck',          source:'English folklore',    genre:'fantasy',       archs:['devoted','artisan'],pseudo:'the pastor', desc:'A man of God who is also a man of the people — and the ale, and the table, and the occasional brawl. Builds things, feeds people, and keeps the community standing.', careers:{ devoted:['priest','acolyte','pilgrim','hermit'], artisan:['cook','brewer','carpenter','innkeeper'] }, note:'CHA primary, INT second — the brewer and cook careers run on knowing your craft. CON third; he takes a lot of hits for a man of the cloth.' },
-  { id:'melisandre',  name:'Melisandre',          source:'G.R.R. Martin',       genre:'fantasy',       archs:['devoted','devoted'],pseudo:'the true believer', careers:{ devoted:['cultist','oracle','priest','inquisitor'] }, desc:'Pure faith, pure fire, pure conviction. She serves her patron absolutely and is rewarded — or punished — in kind. No separation between what she wants and what her god wants.', note:'CHA — all three points if possible. Her patron blessings scale with CHA, and she intends to have many.' },
-];
-
-const ALL_GENRES = ['all', ...new Set(CHARS.map(c => c.genre))];
-
-let builderSel = [null, null]; // [Row = Primary Archetype, Column = Secondary Archetype]
-let activeGenre = 'all';
-let activeCharId = null;
-let selectedCareers = []; // Track PC's chosen careers
-
-function getMatrixKey(a, b) {
-  return `${a}-${b}`; // Pure positional coordinates: Row (Primary) - Column (Secondary)
+// Helper Utility to clear duplicates safely
+function dedupe(array) {
+  return [...new Set(array)];
 }
 
-function dedupe(arr) { return [...new Set(arr)]; }
-function getA(id) { return ARCH[id]; }
+// =========================================================================
+// 2. UNIFIED WIZARD ENGINE STATE ARCHITECTURE
+// =========================================================================
 
-function makePills(list, style) {
-  return list.map(n => {
-    const key = n.toLowerCase().trim();
-    const items = CAREER_ITEMS[key];
-    const isSelected = selectedCareers.includes(key);
+let wizardState = {
+  currentStep: 1,
+  primaryArch: null,
+  secondaryArch: null,
+  attributes: { STR: 0, DEX: 0, CON: 0, INT: 0, WIS: 0, CHA: 0 },
+  pointsToDistribute: 3,
+  selectedCareers: [],
+  inventory: [],
+  hasRolledProvisions: false
+};
+
+// =========================================================================
+// 3. STEP NAVIGATION CORE LOGIC
+// =========================================================================
+
+window.moveStep = function(direction) {
+  const targetStep = wizardState.currentStep + direction;
+  if (targetStep < 1 || targetStep > 4) return;
+  
+  // Downstream data evaluation/seeding hooks
+  if (wizardState.currentStep === 1 && direction === 1) {
+    initAttributeAllocation();
+  } else if (wizardState.currentStep === 2 && direction === 1) {
+    initCareerSelection();
+  } else if (wizardState.currentStep === 3 && direction === 1) {
+    initEquipmentSummary();
+  }
+
+  // Update visual visibility tokens
+  document.getElementById(`pane-step-${wizardState.currentStep}`).classList.remove('active');
+  document.getElementById(`badge-step-${wizardState.currentStep}`).classList.remove('active');
+  
+  wizardState.currentStep = targetStep;
+  
+  document.getElementById(`pane-step-${wizardState.currentStep}`).classList.add('active');
+  document.getElementById(`badge-step-${wizardState.currentStep}`).classList.add('active');
+  
+  validateStepCompletion();
+};
+
+function validateStepCompletion() {
+  const nextBtn = document.getElementById('next-btn');
+  const prevBtn = document.getElementById('prev-btn');
+  
+  prevBtn.disabled = (wizardState.currentStep === 1);
+  let isStepValid = false;
+
+  switch(wizardState.currentStep) {
+    case 1:
+      isStepValid = (wizardState.primaryArch !== null && wizardState.secondaryArch !== null);
+      break;
+    case 2:
+      const primaryStatKey = ARCH[wizardState.primaryArch].stat;
+      const allocatedToPrimary = wizardState.attributes[primaryStatKey];
+      isStepValid = (wizardState.pointsToDistribute === 0 && allocatedToPrimary >= 2);
+      break;
+    case 3:
+      isStepValid = (wizardState.selectedCareers.length === 2);
+      break;
+    case 4:
+      isStepValid = false; // Terminal Step: Block proceeding further
+      break;
+  }
+  
+  nextBtn.disabled = !isStepValid;
+  nextBtn.style.display = (wizardState.currentStep === 4) ? 'none' : 'inline-block';
+}
+
+// =========================================================================
+// 4. STEP 1: MATRICES SELECTION CONTROLLERS
+// =========================================================================
+
+window.selectMatrixCoordinate = function(rowId, colId) {
+  // If the selection has modified an archetype, invalidate downstream choices safely
+  if (wizardState.primaryArch !== rowId || wizardState.secondaryArch !== colId) {
+    wizardState.primaryArch = rowId;
+    wizardState.secondaryArch = colId;
     
-    const tooltipText = items 
-      ? `Starting Kit:\n• ${items.join('\n• ')}` 
-      : 'Standard career gear package';
+    // Reset structural state downstream
+    wizardState.attributes = { STR: 0, DEX: 0, CON: 0, INT: 0, WIS: 0, CHA: 0 };
+    wizardState.pointsToDistribute = 3;
+    wizardState.selectedCareers = [];
+    wizardState.inventory = [];
+    wizardState.hasRolledProvisions = false;
+  }
 
-    const selectedClass = isSelected ? 'selected' : '';
+  renderMatrix();
+  renderMatrixSelectionSummary();
+  validateStepCompletion();
+};
 
-    return `<span class="pill ${selectedClass}" style="${style}" title="${tooltipText}" onclick="toggleCareer('${key}')">${n}</span>`;
+function renderMatrix() {
+  const matrixGridElement = document.getElementById('archetype-matrix');
+  if (!matrixGridElement) return;
+
+  const order = ['blade', 'shadow', 'endurer', 'sage', 'wayfarer', 'devoted'];
+  matrixGridElement.innerHTML = '';
+
+  // Draw Header Spacer Cell
+  const cornerLabel = document.createElement('div');
+  cornerLabel.className = 'matrix-header cell-header-corner';
+  cornerLabel.innerText = 'P \\ S';
+  matrixGridElement.appendChild(cornerLabel);
+
+  // Column Headers
+  order.forEach(colKey => {
+    const colHeader = document.createElement('div');
+    colHeader.className = 'matrix-header cell-header-col';
+    if (wizardState.secondaryArch === colKey) colHeader.classList.add('highlight-axis');
+    colHeader.innerText = ARCH[colKey].name;
+    matrixGridElement.appendChild(colHeader);
+  });
+
+  // Rows and Cells
+  order.forEach(rowKey => {
+    const rowHeader = document.createElement('div');
+    rowHeader.className = 'matrix-header cell-header-row';
+    if (wizardState.primaryArch === rowKey) rowHeader.classList.add('highlight-axis');
+    rowHeader.innerText = ARCH[rowKey].name;
+    matrixGridElement.appendChild(rowHeader);
+
+    order.forEach(colKey => {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      
+      // FIX: Inject the combined archetype label text into the cell
+      const primaryName = ARCH[rowKey].name;
+      const secondaryName = ARCH[colKey].name;
+      cell.innerText = (rowKey === colKey) ? `Pure ${primaryName}` : `${primaryName} / ${secondaryName}`;
+
+      const isSelectedCell = (wizardState.primaryArch === rowKey && wizardState.secondaryArch === colKey);
+      if (isSelectedCell) {
+        cell.classList.add('active-coordinate');
+        cell.style.background = ARCH[rowKey].mid;
+        cell.style.borderColor = ARCH[rowKey].border;
+        cell.style.color = '#ffffff';
+      } else {
+        // Subtle cross-gradient logic layout styling
+        cell.style.background = `linear-gradient(135deg, ${ARCH[rowKey].bg} 0%, ${ARCH[colKey].bg} 100%)`;
+      }
+
+      cell.onclick = () => selectMatrixCoordinate(rowKey, colKey);
+      matrixGridElement.appendChild(cell);
+    });
+  });
+}
+
+function renderMatrixSelectionSummary() {
+  const container = document.getElementById('matrix-selection-summary');
+  if (!container) return;
+
+  if (!wizardState.primaryArch || !wizardState.secondaryArch) {
+    container.innerHTML = `<p class="result-hint">Select a cross-section on the matrix to establish your Primary and Secondary Archetypes.</p>`;
+    return;
+  }
+
+  const primary = ARCH[wizardState.primaryArch];
+  const secondary = ARCH[wizardState.secondaryArch];
+  const isSameArchetype = wizardState.primaryArch === wizardState.secondaryArch;
+
+  container.innerHTML = `
+    <div class="arch-badges" style="margin-bottom: 12px;">
+      <span class="arch-badge" style="background: ${primary.bg}; border-color: ${primary.border}; color: ${primary.txt}">
+        Primary Focus: ${primary.name} (+2 or +3 to ${primary.stat})
+      </span>
+      <span class="arch-badge" style="background: ${secondary.bg}; border-color: ${secondary.border}; color: ${secondary.txt}">
+        Secondary Focus: ${secondary.name} (Can accept leftover points to ${secondary.stat})
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-faded);">
+      Your core functional focus guides your background training: You excel at actions requiring you to <strong>${primary.prompt}</strong>. 
+      ${!isSameArchetype ? `Your secondary background provides tricks allowing you to <strong>${secondary.prompt}</strong>.` : `Doubling down as a pure ${primary.name} concentrates your background paths explicitly inside their historical traditions.`}
+    </p>
+  `;
+}
+
+// =========================================================================
+// 5. STEP 2: ATTRIBUTES ALLOCATION CONTROLLERS
+// =========================================================================
+
+function initAttributeAllocation() {
+  const container = document.getElementById('stats-app');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const primaryStat = ARCH[wizardState.primaryArch].stat;
+  const secondaryStat = ARCH[wizardState.secondaryArch].stat;
+
+  Object.keys(wizardState.attributes).forEach(stat => {
+    let tag = '';
+    if (stat === primaryStat) tag = ' <small style="color:var(--blade-border); font-weight:bold;">(Primary: Require ≥ 2)</small>';
+    else if (stat === secondaryStat) tag = ' <small style="color:var(--sage-border); font-weight:bold;">(Secondary)</small>';
+
+    const div = document.createElement('div');
+    div.className = 'stat-row';
+    div.innerHTML = `
+      <div class="stat-name-tag">${stat}${tag}</div>
+      <div class="stat-ctrls">
+        <button type="button" class="stat-btn" onclick="modifyStat('${stat}', -1)">-</button>
+        <span id="val-${stat}" style="font-weight:600; width:20px; text-align:center; font-size:16px;">${wizardState.attributes[stat]}</span>
+        <button type="button" class="stat-btn" onclick="modifyStat('${stat}', 1)">+</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  
+  document.getElementById('pool-counter').textContent = wizardState.pointsToDistribute;
+}
+
+window.modifyStat = function(stat, changeAmount) {
+  if (changeAmount > 0 && wizardState.pointsToDistribute === 0) return;
+  if (changeAmount < 0 && wizardState.attributes[stat] === 0) return;
+  
+  wizardState.attributes[stat] += changeAmount;
+  wizardState.pointsToDistribute -= changeAmount;
+  
+  document.getElementById(`val-${stat}`).textContent = wizardState.attributes[stat];
+  document.getElementById('pool-counter').textContent = wizardState.pointsToDistribute;
+  
+  validateStepCompletion();
+};
+
+// =========================================================================
+// 6. STEP 3: CAREER MAPPING SELECTION CONTROLLERS
+// =========================================================================
+
+function initCareerSelection() {
+  const container = document.getElementById('career-selection-pools');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const id1 = wizardState.primaryArch;
+  const id2 = wizardState.secondaryArch;
+  
+  const primaryPool = dedupe(ARCH_CAREERS[id1] || []);
+  const secondaryPool = id1 === id2 ? [] : dedupe(ARCH_CAREERS[id2] || []);
+  
+  const sharedCareers = id1 === id2 ? [] : primaryPool.filter(career => secondaryPool.includes(career));
+  const exclusivePrimary = primaryPool.filter(career => !sharedCareers.includes(career));
+  const exclusiveSecondary = secondaryPool.filter(career => !sharedCareers.includes(career));
+
+  let layoutHTML = `
+    <div style="margin-bottom:1rem; text-align:center; font-weight:600; color:var(--blade-border)">
+      Selected Careers: ${wizardState.selectedCareers.length} / 2
+    </div>
+    <div class="careers-cols" style="display: grid; grid-template-columns: ${id1 === id2 ? '1fr' : '1fr 1fr'}; gap: 1.5rem;">
+      <div>
+        <div class="col-label" style="color:${ARCH[id1].txt}; border-bottom: 1px solid var(--rule); margin-bottom: 0.5rem; font-weight: 600;">
+          ${ARCH[id1].name} Career Path List
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">${buildCareerPillElements(exclusivePrimary, ARCH[id1].pill)}</div>
+      </div>
+  `;
+  
+  if (id1 !== id2) {
+    layoutHTML += `
+      <div>
+        <div class="col-label" style="color:${ARCH[id2].txt}; border-bottom: 1px solid var(--rule); margin-bottom: 0.5rem; font-weight: 600;">
+          ${ARCH[id2].name} Career Path List
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">${buildCareerPillElements(exclusiveSecondary, ARCH[id2].pill)}</div>
+      </div>
+    `;
+  }
+  
+  layoutHTML += `</div>`;
+  
+  if (sharedCareers.length) {
+    layoutHTML += `
+      <div style="margin-top:1.5rem">
+        <div class="col-label" style="color:var(--ink); border-bottom: 1px solid var(--rule); margin-bottom: 0.5rem; font-weight: 600;">
+          Shared Dynamic Intersections
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">${buildCareerPillElements(sharedCareers, 'background:var(--parchment-dark); border-color:var(--rule); color:var(--ink)')}</div>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = layoutHTML;
+}
+
+function buildCareerPillElements(careerList, pillInlineStyles) {
+  return careerList.map(careerName => {
+    const generalizedKey = careerName.toLowerCase().trim();
+    const isSelected = wizardState.selectedCareers.includes(generalizedKey);
+    const dynamicSelectionClass = isSelected ? 'selected' : '';
+    
+    // Explicit selection indicators matching original styler schemas
+    const styleOverride = isSelected 
+      ? `${pillInlineStyles}; box-shadow: inset 0 0 0 2px var(--ink); font-weight: bold; transform: scale(1.03);` 
+      : pillInlineStyles;
+
+    return `
+      <span class="pill ${dynamicSelectionClass}" style="${styleOverride}; cursor:pointer; padding:6px 12px; border-radius:4px; display:inline-block; transition:all 0.15s;" 
+            onclick="toggleWizardCareer('${generalizedKey}')">
+        ${careerName} ${isSelected ? '✓' : ''}
+      </span>
+    `;
   }).join('');
 }
 
-function renderMatrix() {
-  const el = document.getElementById('archetype-matrix');
-  el.innerHTML = '';
-
-  const corner = document.createElement('div');
-  corner.className = 'matrix-corner';
-  el.appendChild(corner);
-
-  // Render Top Column Headers (Secondary Archetype Axis)
-  ARCH_ORDER.forEach(colId => {
-    const a = ARCH[colId];
-    const colHdr = document.createElement('button');
-    colHdr.className = `matrix-hdr-col col-${colId}`;
-    colHdr.setAttribute('type', 'button');
-    
-    if (builderSel[1] === colId) {
-      colHdr.classList.add('highlighted-x');
-      colHdr.style.setProperty('--col-bg', a.bg);
-      colHdr.style.setProperty('--col-border', a.border);
-      colHdr.style.setProperty('--col-txt', a.txt);
-    }
-    
-    colHdr.innerHTML = `<span>${a.name}</span><span class="stat-lbl">${a.stat}</span>`;
-    
-    colHdr.addEventListener('click', () => {
-      activeCharId = null;
-      builderSel[1] = (builderSel[1] === colId) ? null : colId;
-      selectedCareers = []; // Clear chosen careers on archetype state update
-      renderMatrix();
-      renderBuilderResult();
-      renderCharList();
-      renderClearMatrixFilterBtn();
-    });
-    
-    el.appendChild(colHdr);
-  });
-
-  // Render Rows (Primary Archetype Axis)
-  ARCH_ORDER.forEach(rowId => {
-    const rArch = ARCH[rowId];
-    
-    const rowHdr = document.createElement('button');
-    rowHdr.className = `matrix-hdr-row row-${rowId}`;
-    rowHdr.setAttribute('type', 'button');
-    
-    if (builderSel[0] === rowId) {
-      rowHdr.classList.add('highlighted-y');
-      rowHdr.style.setProperty('--col-bg', rArch.bg);
-      rowHdr.style.setProperty('--col-border', rArch.border);
-      rowHdr.style.setProperty('--col-txt', rArch.txt);
-    }
-    
-    rowHdr.innerHTML = `<span>${rArch.name}</span><span class="stat-lbl">${rArch.stat}</span>`;
-    
-    rowHdr.addEventListener('click', () => {
-      activeCharId = null;
-      builderSel[0] = (builderSel[0] === rowId) ? null : rowId;
-      selectedCareers = []; // Clear chosen careers on archetype state update
-      renderMatrix();
-      renderBuilderResult();
-      renderCharList();
-      renderClearMatrixFilterBtn();
-    });
-    
-    el.appendChild(rowHdr);
-
-    ARCH_ORDER.forEach(colId => {
-      const cArch = ARCH[colId];
-      const key = getMatrixKey(rowId, colId);
-      const combo = MATRIX[key];
-      
-      const cell = document.createElement('button');
-      cell.className = 'matrix-cell';
-      cell.setAttribute('type', 'button');
-      
-      const isSelected = (builderSel[0] === rowId && builderSel[1] === colId);
-      
-      if (isSelected) {
-        cell.classList.add('selected');
-        cell.style.setProperty('--col-bg', rArch.bg);
-        cell.style.setProperty('--col-border', rArch.border);
-        cell.style.setProperty('--col-txt', rArch.txt);
-      }
-
-      cell.innerHTML = `<span class="cell-title">${combo.name.replace('the ', '')}</span>`;
-      
-      cell.addEventListener('click', () => {
-        activeCharId = null;
-        if (isSelected) {
-          builderSel = [null, null];
-        } else {
-          builderSel = [rowId, colId];
-        }
-        selectedCareers = []; // Clear chosen careers on archetype state update
-        renderMatrix();
-        renderBuilderResult();
-        renderCharList();
-        renderClearMatrixFilterBtn();
-      });
-      
-      el.appendChild(cell);
-    });
-  });
-}
-
-function renderBuilderResult() {
-  const el = document.getElementById('builder-result');
-  const [id1, id2] = builderSel;
+window.toggleWizardCareer = function(careerKey) {
+  const index = wizardState.selectedCareers.indexOf(careerKey);
   
-  if (!id1 && !id2) {
-    el.innerHTML = '<p class="result-hint">Select an individual archetype header or a cross-section grid cell to view calling details. The character pool on the left will cross-filter to matches.</p>';
-    return;
-  }
-  
-  el.classList.remove('flash');
-  void el.offsetWidth;
-  el.classList.add('flash');
-
-  if (id1 && !id2) {
-    const a1 = getA(id1);
-    el.innerHTML = `
-      <div class="combo-name">Primary Archetype: ${a1.name} Isolated</div>
-      <div class="arch-badges">
-        <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary Focus: ${a1.name} · ${a1.stat}</span>
-      </div>
-      <div class="combo-desc">Focusing on paths requiring you to <strong>${a1.prompt}</strong>. Select a Secondary Archetype parameter to secure a compound calling. Character lists are currently filtered for targets matching ${a1.name} as Primary.</div>
-      <div class="divider"></div>
-      <div><div class="col-label" style="color:${a1.txt}">${a1.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id1]), a1.pill)}</div>
-      <p class="stat-hint" style="margin-top:.75rem">⚠ CON benefits every archetype equally — it governs item slots and wound capacity. Prioritise it after your primary stat.</p>
-    `;
-    return;
-  }
-
-  if (!id1 && id2) {
-    const a2 = getA(id2);
-    el.innerHTML = `
-      <div class="combo-name">Secondary Archetype: ${a2.name} Isolated</div>
-      <div class="arch-badges">
-        <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary Focus: ${a2.name} · ${a2.stat}</span>
-      </div>
-      <div class="combo-desc">Evaluating build tracks built on actions to <strong>${a2.prompt}</strong>. Select a Primary Archetype structural coordinate to intersect. Character list matches are adjusted for ${a2.name} as Secondary.</div>
-      <div class="divider"></div>
-      <div><div class="col-label" style="color:${a2.txt}">${a2.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id2]), a2.pill)}</div>
-      <p class="stat-hint" style="margin-top:.75rem">⚠ CON benefits every archetype equally — it governs item slots and wound capacity. Prioritise it after your primary stat.</p>
-    `;
-    return;
-  }
-
-  const key = getMatrixKey(id1, id2);
-  const combo = MATRIX[key];
-  const a1 = getA(id1), a2 = getA(id2);
-  const same = id1 === id2;
-
-  const c1 = dedupe(ARCH_CAREERS[id1]);
-  const c2 = same ? [] : dedupe(ARCH_CAREERS[id2]);
-  const shared = same ? [] : c1.filter(c => c2.includes(c));
-  const only1 = c1.filter(c => !shared.includes(c));
-  const only2 = c2.filter(c => !shared.includes(c));
-
-  const badgeHTML = `
-    <div class="arch-badges">
-      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary: ${a1.name} · ${a1.stat}</span>
-      <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name} · ${a2.stat}</span>
-    </div>`;
-
-  let careersHTML;
-  if (same) {
-    careersHTML = `<div><div class="col-label" style="color:${a1.txt}">${a1.name} careers</div>${makePills(only1, a1.pill)}</div>`;
+  if (index > -1) {
+    wizardState.selectedCareers.splice(index, 1);
   } else {
-    const sharedSec = shared.length ? `<div style="margin-top:.6rem"><div class="col-label">shared by both</div>${makePills(shared,'background:var(--parchment);border-color:var(--rule);color:var(--ink-faded)')}</div>` : '';
-    careersHTML = `
-      <div class="careers-cols">
-        <div><div class="col-label" style="color:${a1.txt}">Primary: ${a1.name}</div>${makePills(only1, a1.pill)}</div>
-        <div><div class="col-label" style="color:${a2.txt}">Secondary: ${a2.name}</div>${makePills(only2, a2.pill)}</div>
-      </div>
-      ${sharedSec}`;
-  }
-
-  const statLine = same
-    ? `<p class="stat-hint">Primary stat focus: <strong>${a1.stat}</strong> — assign higher starting bonuses here. CON benefits every archetype — prioritise it after your primary stat.</p>`
-    : `<p class="stat-hint">Primary focus: <strong>${a1.stat}</strong> · Secondary focus: <strong>${a2.stat}</strong>. CON benefits every archetype — prioritise it after these two.</p>`;
-
-  el.innerHTML = `
-    <div class="combo-name">${combo.name}</div>
-    ${badgeHTML}
-    <div class="combo-desc">${combo.desc}</div>
-    <div class="combo-eg">e.g. ${combo.eg}</div>
-    <div class="divider"></div>
-    ${statLine}
-    <div class="divider"></div>
-    ${careersHTML}
-  `;
-}
-
-function renderCharFilters() {
-  const el = document.getElementById('char-filters');
-  el.innerHTML = '';
-  ALL_GENRES.forEach(g => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (activeGenre === g ? ' active' : '');
-    btn.textContent = g === 'all' ? 'all' : g;
-    btn.onclick = () => { activeGenre = g; renderCharFilters(); renderCharList(); };
-    el.appendChild(btn);
-  });
-}
-
-function renderClearMatrixFilterBtn() {
-  const container = document.getElementById('clear-matrix-filter-container');
-  container.innerHTML = '';
-  
-  if (builderSel[0] || builderSel[1]) {
-    const btn = document.createElement('button');
-    btn.className = 'clear-filter-btn';
-    btn.textContent = '✕ Reset Matrix';
-    btn.onclick = () => {
-      builderSel = [null, null];
-      activeCharId = null;
-      selectedCareers = []; // Clear chosen careers on filter wipe/reset
-      renderMatrix();
-      renderBuilderResult();
-      renderCharList();
-      document.getElementById('char-result').innerHTML = '<p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>';
-      renderClearMatrixFilterBtn();
-    };
-    container.appendChild(btn);
-  }
-}
-
-function characterMatchesMatrixFilter(c) {
-  const [m1, m2] = builderSel;
-  if (!m1 && !m2) return true;
-  
-  if (m1 && m2) {
-    return c.archs[0] === m1 && c.archs[1] === m2;
-  }
-  if (m1) {
-    return c.archs[0] === m1;
-  }
-  if (m2) {
-    return c.archs[1] === m2;
-  }
-  return true;
-}
-
-function renderCharList() {
-  const el = document.getElementById('char-list');
-  el.innerHTML = '';
-  
-  let list = activeGenre === 'all' ? CHARS : CHARS.filter(c => c.genre === activeGenre);
-  
-  const hasMatrixFilter = (builderSel[0] || builderSel[1]);
-  const isDrivenByCharacter = activeCharId !== null;
-
-  if (!isDrivenByCharacter && hasMatrixFilter) {
-    list = list.filter(characterMatchesMatrixFilter);
-  }
-
-  if (list.length === 0) {
-    el.innerHTML = '<div class="char-result-hint">No inspirations match this precise matrix focus.</div>';
-    return;
-  }
-
-  list.forEach(c => {
-    const a1 = getA(c.archs[0]);
-    const a2 = getA(c.archs[1]);
-    const isActive = activeCharId === c.id;
-    const item = document.createElement('button');
-    item.className = 'char-item' + (isActive ? ' active' : '');
-    
-    if (isActive) {
-      item.style.setProperty('--col-bg', a1.bg);
-      item.style.setProperty('--col-border', a1.border);
-    }
-    
-    const archLabel = c.archs[0] === c.archs[1] ? a1.name : `${a1.name} + ${a2.name}`;
-    item.innerHTML = `
-      <div>
-        <div class="char-item-name">${c.name}</div>
-        <div class="char-item-source">${c.source}</div>
-      </div>
-      <span class="char-item-arch" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">${archLabel}</span>
-    `;
-    
-    item.onclick = () => { 
-      if (isActive) {
-        activeCharId = null; 
-        builderSel = [null, null];
-        document.getElementById('char-result').innerHTML = '<p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>';
-      } else {
-        activeCharId = c.id; 
-        renderCharResult(c);
-        builderSel = [c.archs[0], c.archs[1]];
-      }
-      selectedCareers = []; // Clear chosen careers when migrating archetype setups via profiles
-      
-      renderCharList(); 
-      renderMatrix();
-      renderBuilderResult();
-      renderClearMatrixFilterBtn();
-    };
-    el.appendChild(item);
-  });
-}
-
-function renderCharResult(c) {
-  const el = document.getElementById('char-result');
-  el.classList.remove('flash');
-  void el.offsetWidth;
-  el.classList.add('flash');
-
-  const a1 = getA(c.archs[0]), a2 = getA(c.archs[1]);
-  const same = c.archs[0] === c.archs[1];
-  
-  const all1 = (c.careers && c.careers[c.archs[0]]) ? c.careers[c.archs[0]] : (c.careers ? Object.values(c.careers).flat() : []);
-  const all2 = (!same && c.careers && c.careers[c.archs[1]]) ? c.careers[c.archs[1]] : [];
-  
-  const shared = all1.filter(x => all2.includes(x));
-  const only1 = all1.filter(x => !shared.includes(x));
-  const only2 = all2.filter(x => !shared.includes(x));
-
-  let careersHTML;
-  if (same || !all2.length) {
-    careersHTML = `<div><div class="col-label" style="color:${a1.txt}">${a1.name} careers</div>${makePills(dedupe(all1), a1.pill)}</div>`;
-  } else {
-    const sharedSec = shared.length ? `<div style="margin-top:.6rem"><div class="col-label">shared</div>${makePills(shared,'background:var(--parchment);border-color:var(--rule);color:var(--ink-faded)')}</div>` : '';
-    careersHTML = `
-      <div class="careers-cols">
-        <div><div class="col-label" style="color:${a1.txt}">Primary: ${a1.name}</div>${makePills(only1, a1.pill)}</div>
-        <div><div class="col-label" style="color:${a2.txt}">Secondary: ${a2.name}</div>${makePills(only2, a2.pill)}</div>
-      </div>
-      ${sharedSec}`;
-  }
-
-  el.innerHTML = `
-    <div class="char-r-name">${c.name}</div>
-    <div class="char-r-source">${c.source} — <em>${c.pseudo || 'Hero'}</em></div>
-    <div class="arch-badges">
-      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary: ${a1.name}</span>
-      <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name}</span>
-    </div>
-    <div class="char-r-desc">${c.desc}</div>
-    <div class="divider"></div>
-    <div class="col-label" style="margin-bottom:6px">Best-fit kits & careers</div>
-    ${careersHTML}
-    ${c.note ? `<div class="char-r-note">${c.note}</div>` : ''}
-  `;
-}
-
-window.toggleCareer = function(careerKey) {
-  const careerIndex = selectedCareers.indexOf(careerKey);
-  
-  // Rule 1: If already chosen, remove it unconditionally
-  if (careerIndex > -1) {
-    selectedCareers.splice(careerIndex, 1);
-    renderBuilderResult();
-    if (activeCharId) renderActiveCharacterDetails(); 
-    return;
+    // Structural Rule: Maximum boundary cap at 2 careers
+    if (wizardState.selectedCareers.length >= 2) return;
+    wizardState.selectedCareers.push(careerKey);
   }
   
-  // Rule 2: Global Guard - Cap maximum active career choices at 2
-  if (selectedCareers.length >= 2) {
-    return;
-  }
-
-  const [primaryArchetypeId, secondaryArchetypeId] = builderSel;
-
-  // Rule 3: Enforce career bucket constraints only when two distinct cross-sections are selected
-  if (primaryArchetypeId && secondaryArchetypeId && primaryArchetypeId !== secondaryArchetypeId) {
-    if (selectedCareers.length === 1) {
-      const existingSelectedKey = selectedCareers[0];
-      
-      const primaryCareersPool = ARCH_CAREERS[primaryArchetypeId] || [];
-      const secondaryCareersPool = ARCH_CAREERS[secondaryArchetypeId] || [];
-      
-      // Inline matching checkers
-      const isSharedCareer = (key) => primaryCareersPool.includes(key) && secondaryCareersPool.includes(key);
-      const isPrimaryExclusive = (key) => primaryCareersPool.includes(key) && !secondaryCareersPool.includes(key);
-      
-      const getCareerPoolType = (key) => {
-        if (isSharedCareer(key)) return 'shared';
-        if (isPrimaryExclusive(key)) return 'primary-exclusive';
-        return 'secondary-exclusive';
-      };
-      
-      const existingCareerPool = getCareerPoolType(existingSelectedKey);
-      const newCareerPool = getCareerPoolType(careerKey);
-      
-      // Rule 3b: Block doubling down on exclusive pools (No Primary+Primary or Secondary+Secondary), 
-      // but explicitly ALLOW selecting two Shared/Common careers.
-      if (existingCareerPool === newCareerPool && existingCareerPool !== 'shared') {
-        return;
-      }
-    }
-  }
-
-  selectedCareers.push(careerKey);
-
-  // Propagate state changes cleanly to view components
-  renderBuilderResult();
-  if (activeCharId) {
-    renderActiveCharacterDetails();
-  }
+  initCareerSelection();
+  validateStepCompletion();
 };
 
-renderMatrix();
-renderBuilderResult();
-renderCharFilters();
-renderCharList();
-renderClearMatrixFilterBtn();
+// =========================================================================
+// 7. STEP 4: EQUIPMENT ENGINE & CHARACTER SHEET SUMMARY
+// =========================================================================
+
+function initEquipmentSummary() {
+  const gearListContainer = document.getElementById('career-gear-list');
+  if (!gearListContainer) return;
+  
+  gearListContainer.innerHTML = '';
+  
+  // Wipe and rebuild baseline equipment arrays based on chosen career pools
+  wizardState.inventory = [];
+  
+  wizardState.selectedCareers.forEach(careerKey => {
+    const structuralCareerItems = CAREER_ITEMS[careerKey] || [];
+    structuralCareerItems.forEach(item => wizardState.inventory.push(item));
+  });
+
+  // Knave 2e Spellbook Archetype Trigger: Give a starting spellbook if INT > 0
+  if (wizardState.attributes.INT > 0) {
+    const explicitSpellbookItem = 'Spellbook (Contains 1 random Level-1 Spell)';
+    if (!wizardState.inventory.includes(explicitSpellbookItem)) {
+      wizardState.inventory.push(explicitSpellbookItem);
+    }
+  }
+
+  // Render text readouts
+  if (wizardState.inventory.length === 0) {
+    gearListContainer.innerHTML = '<p class="step-instruction">No equipment loaded. Check upstream choices.</p>';
+  } else {
+    gearListContainer.innerHTML = `
+      <ul style="padding-left: 1.25rem; margin: 0 0 1rem 0; line-height: 1.6; color: var(--ink-faded);">
+        ${wizardState.inventory.map(item => `<li><strong>${item}</strong></li>`).join('')}
+      </ul>
+    `;
+  }
+  
+  refreshInventoryDisplay();
+}
+
+window.rollStockGold = function() {
+  if (wizardState.hasRolledProvisions) {
+    alert('Provisions, tools, and starting coin have already been rolled for this character.');
+    return;
+  }
+
+  // Knave 2e Core Rule: Roll 3d6 for baseline copper pieces
+  const standardDiceRollResult = (Math.floor(Math.random() * 6) + 1) + 
+                                 (Math.floor(Math.random() * 6) + 1) + 
+                                 (Math.floor(Math.random() * 6) + 1);
+
+  // Core Provision Bundle Packages
+  const baselineProvisions = ['3d6 Coins (' + standardDiceRollResult + ' Copper)', '2 Rations', "50' Rope", '2 Torches'];
+  
+  baselineProvisions.forEach(provisionItem => {
+    wizardState.inventory.push(provisionItem);
+  });
+
+  wizardState.hasRolledProvisions = true;
+  initEquipmentSummary(); // Re-render text panel listings
+};
+
+function refreshInventoryDisplay() {
+  const currentSlotsTracker = document.getElementById('slot-tracker');
+  const maxSlotsTracker = document.getElementById('max-slots-tracker');
+  const inventoryGridElement = document.getElementById('inventory-slots-grid');
+  
+  if (!inventoryGridElement) return;
+  inventoryGridElement.innerHTML = '';
+  
+  // Structural Carrying Rule: Maximum safe boundary capacity calculation formula ($10 + \text{CON}$)
+  const configuredMaxCarryCapacity = 10 + wizardState.attributes.CON;
+  const itemsCurrentlyInInventory = wizardState.inventory.length;
+
+  if (currentSlotsTracker) currentSlotsTracker.textContent = itemsCurrentlyInInventory;
+  if (maxSlotsTracker) maxSlotsTracker.textContent = configuredMaxCarryCapacity;
+
+  for (let slotIndex = 0; slotIndex < configuredMaxCarryCapacity; slotIndex++) {
+    const itemInSlot = wizardState.inventory[slotIndex] || '— [Empty Slot] —';
+    const isOccupiedSlot = !!wizardState.inventory[slotIndex];
+    
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'inv-slot-row';
+    if (!isOccupiedSlot) {
+      rowDiv.style.opacity = '0.5';
+      rowDiv.style.color = 'var(--ink-ghost)';
+    }
+    
+    rowDiv.innerHTML = `
+      <span>Slot ${slotIndex + 1}:</span>
+      <span style="font-family: 'Crimson Text', serif; font-size: 14px;">${itemInSlot}</span>
+    `;
+    inventoryGridElement.appendChild(rowDiv);
+  }
+  
+  // Visual alert feedback warnings if player scales past carry capacity barriers
+  if (itemsCurrentlyInInventory > configuredMaxCarryCapacity) {
+    if (currentSlotsTracker) currentSlotsTracker.style.color = 'var(--blade-border)';
+    rowDiv.style.borderColor = 'var(--blade-border)';
+  } else {
+    if (currentSlotsTracker) currentSlotsTracker.style.color = 'inherit';
+  }
+}
+
+// =========================================================================
+// 8. DOCUMENT READY RUNTIME INITIALIZATION HOOKS
+// =========================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderMatrix();
+  validateStepCompletion();
+});

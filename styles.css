@@ -529,3 +529,77 @@ body {
   color: var(--parchment) !important;
   box-shadow: 0 0 0 1px var(--parchment), 0 0 0 2px var(--ink);
 }
+
+.wizard-progress {
+  display: flex;
+  background: var(--parchment-dark);
+  border-bottom: 2px solid var(--rule);
+  justify-content: space-around;
+  padding: 0.75rem;
+}
+
+.progress-step {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-ghost);
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+}
+
+.progress-step.active {
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+
+.wizard-pane {
+  display: none;
+  padding: 1.75rem 2rem;
+  background: var(--parchment);
+}
+
+.wizard-pane.active {
+  display: block;
+}
+
+.wizard-navigation {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  background: var(--parchment-dark);
+  border-top: 1px solid var(--rule);
+}
+
+.nav-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 20px;
+  cursor: pointer;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+
+.primary-btn { background: var(--ink); color: var(--parchment); }
+.primary-btn:disabled { background: var(--rule-light); color: var(--ink-ghost); cursor: not-allowed; }
+.secondary-btn { background: var(--parchment); color: var(--ink-faded); }
+
+.step-instruction { font-style: italic; color: var(--ink-faded); margin-bottom: 1.5rem; }
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 400px;
+  margin-bottom: 0.75rem;
+  background: var(--parchment-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+.stat-name-tag { font-family: 'Cinzel', serif; font-weight: 600; width: 120px; }
+.stat-ctrls { display: flex; align-items: center; gap: 12px; }
+.stat-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--rule); cursor: pointer; font-weight: bold; }
+
+.sheet-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+.inventory-display { display: flex; flex-direction: column; gap: 4px; margin-top: 0.5rem; }
+.inv-slot-row { display: flex; justify-content: space-between; padding: 6px; background: var(--parchment-dark); border: 1px dashed var(--rule); font-size: 13px; }
