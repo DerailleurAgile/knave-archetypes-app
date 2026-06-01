@@ -65,12 +65,37 @@ const MATRIX = {
 };
 
 const ARCH_CAREERS = {
-  blade:    ['assassin','bandit','beast tamer','butcher','fence','gambler','grave robber','guard','headsman','inquisitor','jailer','kidnapper','knight','pit fighter','pirate','saboteur','soldier','squire','thug','torturer','watchman'],
-  shadow:   ['acrobat','actor','assassin','bandit','burglar','charlatan','coachman','courtier','cutpurse','fence','jester','kidnapper','locksmith','puppeteer','rat catcher','smuggler','spy','thieftaker','thug'],
-  wayfarer: ['beast tamer','boatman','courier','explorer','falconer','fisherman','gamekeeper','hermit','hunter','miner','naturalist','pilgrim','poacher','prospector','sailor','scout','shepherd','trapper','woodcutter'],
-  sage:     ['alchemist','antiquarian','arcanist','astrologer','bookbinder','folklorist','herbalist','investigator','naturalist','oracle','philosopher','physician','playwright','architect','scribe','inquisitor'],
-  devoted:  ['acolyte','actor','courtier','cultist','hermit','inquisitor','jester','knight','lawyer','merchant','musician','officer','oracle','orator','philosopher','pilgrim','poet','priest','singer'],
-  artisan:  ['architect','baker','barber','beekeeper','blacksmith','bookbinder','brewer','candlemaker','carpenter','cobbler','cook','dyer','gardener','gravedigger','groom','innkeeper','mason','painter','sculptor','shipwright','tailor','tattooist','woodcutter'],
+  blade: [
+    'assassin', 'bandit', 'beast tamer', 'blacksmith', 'butcher', 'fence', 'gambler', 
+    'grave robber', 'guard', 'headsman', 'inquisitor', 'jailer', 'kidnapper', 'knight', 
+    'pit fighter', 'pirate', 'saboteur', 'soldier', 'squire', 'thug', 'torturer', 'watchman'
+  ],
+  shadow: [
+    'acrobat', 'actor', 'assassin', 'bandit', 'barber', 'burglar', 'charlatan', 'cobbler', 
+    'coachman', 'courtier', 'cutpurse', 'fence', 'jester', 'jeweler', 'kidnapper', 'locksmith', 
+    'peddler', 'puppeteer', 'rat catcher', 'smuggler', 'spy', 'tailor', 'tattooist', 'thieftaker', 'thug'
+  ],
+  endurer: [
+    'baker', 'blacksmith', 'boatman', 'brewer', 'candlemaker', 'carpenter', 'cobbler', 
+    'cook', 'dyer', 'fisherman', 'gravedigger', 'groom', 'hermit', 'hunter', 'innkeeper', 
+    'mason', 'miner', 'pilgrim', 'prospector', 'sailor', 'sculptor', 'servant', 'shepherd', 
+    'shipwright', 'trapper'
+  ],
+  wayfarer: [
+    'beast tamer', 'beekeeper', 'boatman', 'courier', 'explorer', 'falconer', 'fisherman', 
+    'gamekeeper', 'gardener', 'groom', 'hermit', 'hunter', 'miner', 'naturalist', 'pilgrim', 
+    'poacher', 'prospector', 'sailor', 'scout', 'shepherd', 'shipwright', 'trapper', 'woodcutter'
+  ],
+  sage: [
+    'alchemist', 'antiquarian', 'arcanist', 'architect', 'astrologer', 'bookbinder', 
+    'brewer', 'dyer', 'folklorist', 'herbalist', 'inquisitor', 'investigator', 'naturalist', 
+    'oracle', 'painter', 'philosopher', 'physician', 'playwright', 'scribe'
+  ],
+  devoted: [
+    'acolyte', 'actor', 'courtier', 'cultist', 'hermit', 'inquisitor', 'jester', 'knight', 
+    'lawyer', 'merchant', 'musician', 'officer', 'oracle', 'orator', 'painter', 'peddler', 
+    'philosopher', 'pilgrim', 'poet', 'priest', 'sculptor', 'servant', 'singer'
+  ]
 };
 
 const CHARS = [
@@ -271,10 +296,11 @@ function renderBuilderResult() {
   const only1 = c1.filter(c => !shared.includes(c));
   const only2 = c2.filter(c => !shared.includes(c));
 
+  // REMOVED Conditonal check so both badges render unconditionally when a cell is active
   const badgeHTML = `
     <div class="arch-badges">
       <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary: ${a1.name} · ${a1.stat}</span>
-      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name} · ${a2.stat}</span>` : ''}
+      <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name} · ${a2.stat}</span>
     </div>`;
 
   let careersHTML;
@@ -454,7 +480,7 @@ function renderCharResult(c) {
     <div class="char-r-source">${c.source} — <em>${c.pseudo || 'Hero'}</em></div>
     <div class="arch-badges">
       <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary: ${a1.name}</span>
-      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name}</span>` : ''}
+      <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary: ${a2.name}</span>
     </div>
     <div class="char-r-desc">${c.desc}</div>
     <div class="divider"></div>
