@@ -22,7 +22,7 @@
   --wayfarer-bg: #e8f0e0; --wayfarer-border: #2a5a18; --wayfarer-txt: #1a3a0a; --wayfarer-mid: #4a8a30;
   --sage-bg: #e4eef8; --sage-border: #1a4a88; --sage-txt: #0a2a58; --sage-mid: #2a6ab8;
   --devoted-bg: #f5e4ee; --devoted-border: #882050; --devoted-txt: #581030; --devoted-mid: #b84070;
-  --artisan-bg: #f5eeddd; --artisan-border: #7a4a10; --artisan-txt: #4a2a08; --artisan-mid: #a06820;
+  --artisan-bg: #f5eed5; --artisan-border: #7a4a10; --artisan-txt: #4a2a08; --artisan-mid: #a06820;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,11 +36,10 @@ body {
 }
 
 .page {
-  max-width: 1050px;
+  max-width: 1150px;
   margin: 0 auto;
   background: var(--parchment);
   border: 2px solid var(--rule);
-  padding: 0;
   position: relative;
 }
 
@@ -86,18 +85,15 @@ body {
 
 .two-col {
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
+  grid-template-columns: 1.3fr 1.5fr;
   min-height: 600px;
+  gap: 0; /* Keeps the clean interior dividing lines intact */
 }
 
-@media (max-width: 950px) {
-  .two-col {
-    grid-template-columns: 1fr;
-  }
-  .panel-left {
-    border-right: none !important;
-    border-bottom: 1.5px solid var(--rule);
-  }
+/* Ensure the dividing line stays consistent */
+.panel-left {
+  border-right: 1.5px solid var(--rule);
+  border-bottom: none;
 }
 
 .panel {
@@ -168,7 +164,7 @@ body {
 
 .matrix-grid {
   display: grid;
-  grid-template-columns: 85px repeat(6, minmax(70px, 1fr));
+  grid-template-columns: 85px repeat(6, minmax(65px, 1fr));
   gap: 4px;
   background: var(--parchment-dark);
   padding: 6px;
@@ -181,7 +177,6 @@ body {
   background: transparent;
 }
 
-/* Axis Headers as Clickable Interactive Targets */
 .matrix-hdr-col, .matrix-hdr-row {
   background: var(--parchment);
   border: 1px solid var(--rule);
@@ -204,11 +199,6 @@ body {
   background: var(--parchment-darker);
   border-color: var(--ink-faded);
   color: var(--ink);
-}
-
-.matrix-hdr-col:focus-visible, .matrix-hdr-row:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: -2px;
 }
 
 .matrix-hdr-col .stat-lbl, .matrix-hdr-row .stat-lbl {
@@ -237,11 +227,6 @@ body {
   border-color: var(--ink-ghost);
 }
 
-.matrix-cell:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: -2px;
-}
-
 .matrix-cell .cell-title {
   font-family: 'Cinzel', serif;
   font-size: 9px;
@@ -262,7 +247,6 @@ body {
   color: var(--col-txt);
 }
 
-/* Explicit Active Axis Highlighting Styles */
 .matrix-hdr-col.highlighted-x, .matrix-hdr-row.highlighted-y {
   background: var(--col-bg) !important;
   border-color: var(--col-border) !important;
@@ -368,11 +352,19 @@ body {
   margin-top: .5rem;
 }
 
+.char-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
 .char-filters {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
 }
 
 .filter-btn {
@@ -393,6 +385,20 @@ body {
 .filter-btn:hover { background: var(--parchment-dark); }
 .filter-btn.active { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
 
+.clear-filter-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border: 1px dashed #8b2020;
+  background: #f9e8e8;
+  color: #5a1010;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.clear-filter-btn:hover { background: #f2d4d4; }
+
 .char-list {
   display: flex;
   flex-direction: column;
@@ -402,6 +408,7 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--rule) transparent;
   padding-right: 4px;
+  margin-bottom: 1rem;
 }
 
 .char-item {
@@ -456,7 +463,6 @@ body {
   border: 1px solid var(--rule);
   background: var(--parchment-dark);
   padding: 1.25rem;
-  margin-top: 1rem;
   border-radius: 3px;
   min-height: 120px;
 }
@@ -500,41 +506,6 @@ body {
   padding-top: .6rem;
 }
 
-.load-btn {
-  display: block;
-  width: 100%;
-  margin-top: .75rem;
-  padding: 8px;
-  font-family: 'Cinzel', serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  background: var(--ink);
-  color: var(--parchment);
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: opacity .15s;
-}
-
-.load-btn:hover { opacity: .85; }
-
-.new-badge {
-  font-family: 'Cinzel', serif;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: .06em;
-  padding: 1px 5px;
-  border-radius: 2px;
-  background: var(--wayfarer-bg);
-  color: var(--wayfarer-txt);
-  border: 1px solid var(--wayfarer-border);
-  margin-left: 5px;
-  vertical-align: middle;
-  text-transform: uppercase;
-}
-
 .flash {
   animation: flashin .3s ease-out;
 }
@@ -567,7 +538,24 @@ body {
 
   <div class="two-col">
 
+    <!-- LEFT PANEL: Character Inspiration (Primary Driver) -->
     <div class="panel panel-left">
+      <div class="panel-title">Character Inspiration</div>
+
+      <div class="char-header-row">
+        <div class="char-filters" id="char-filters"></div>
+        <div id="clear-matrix-filter-container"></div>
+      </div>
+      
+      <div class="char-list" id="char-list"></div>
+
+      <div class="char-result" id="char-result">
+        <p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Archetype Matrix & Custom Outputs -->
+    <div class="panel panel-right">
       <div class="panel-title">Archetype Matrix</div>
       
       <div class="matrix-container">
@@ -581,18 +569,7 @@ body {
       </div>
 
       <div class="result-box" id="builder-result">
-        <p class="result-hint">Select a cross-section on the matrix to see its pseudo-class combination, features, and key stat arrays.</p>
-      </div>
-    </div>
-
-    <div class="panel panel-right">
-      <div class="panel-title">Character Inspiration</div>
-
-      <div class="char-filters" id="char-filters"></div>
-      <div class="char-list" id="char-list"></div>
-
-      <div class="char-result" id="char-result">
-        <p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and best-fit kits.</p>
+        <p class="result-hint">Select a cross-section on the matrix or an individual header axis to parse a pseudo-class setup.</p>
       </div>
     </div>
 
@@ -707,7 +684,6 @@ function renderMatrix() {
     colHdr.className = `matrix-hdr-col col-${colId}`;
     colHdr.setAttribute('type', 'button');
     
-    // Highlight if selected as Archetype 2
     if (builderSel[1] === colId) {
       colHdr.classList.add('highlighted-x');
       colHdr.style.setProperty('--col-bg', a.bg);
@@ -717,11 +693,14 @@ function renderMatrix() {
     
     colHdr.innerHTML = `<span>${a.name}</span><span class="stat-lbl">${a.stat}</span>`;
     
-    // Click column to isolate or toggle Archetype 2
     colHdr.addEventListener('click', () => {
       builderSel[1] = (builderSel[1] === colId) ? null : colId;
+      // Evaluate if an exact character matching profile is unselected or lost
+      syncSelectedCharacterFromMatrix();
       renderMatrix();
       renderBuilderResult();
+      renderCharList();
+      renderClearMatrixFilterBtn();
     });
     
     el.appendChild(colHdr);
@@ -735,7 +714,6 @@ function renderMatrix() {
     rowHdr.className = `matrix-hdr-row row-${rowId}`;
     rowHdr.setAttribute('type', 'button');
     
-    // Highlight if selected as Archetype 1
     if (builderSel[0] === rowId) {
       rowHdr.classList.add('highlighted-y');
       rowHdr.style.setProperty('--col-bg', rArch.bg);
@@ -745,11 +723,13 @@ function renderMatrix() {
     
     rowHdr.innerHTML = `<span>${rArch.name}</span><span class="stat-lbl">${rArch.stat}</span>`;
     
-    // Click row to isolate or toggle Archetype 1
     rowHdr.addEventListener('click', () => {
       builderSel[0] = (builderSel[0] === rowId) ? null : rowId;
+      syncSelectedCharacterFromMatrix();
       renderMatrix();
       renderBuilderResult();
+      renderCharList();
+      renderClearMatrixFilterBtn();
     });
     
     el.appendChild(rowHdr);
@@ -780,8 +760,11 @@ function renderMatrix() {
         } else {
           builderSel = [rowId, colId];
         }
+        syncSelectedCharacterFromMatrix();
         renderMatrix();
         renderBuilderResult();
+        renderCharList();
+        renderClearMatrixFilterBtn();
       });
       
       el.appendChild(cell);
@@ -793,9 +776,8 @@ function renderBuilderResult() {
   const el = document.getElementById('builder-result');
   const [id1, id2] = builderSel;
   
-  // Adaptive partial state summaries
   if (!id1 && !id2) {
-    el.innerHTML = '<p class="result-hint">Select an individual archetype header or a cross-section grid cell to view calling details.</p>';
+    el.innerHTML = '<p class="result-hint">Select an individual archetype header or a cross-section grid cell to view calling details. The character pool on the left will cross-filter to matches.</p>';
     return;
   }
   
@@ -803,7 +785,6 @@ function renderBuilderResult() {
   void el.offsetWidth;
   el.classList.add('flash');
 
-  // Partial evaluation layouts
   if (id1 && !id2) {
     const a1 = getA(id1);
     el.innerHTML = `
@@ -811,7 +792,7 @@ function renderBuilderResult() {
       <div class="arch-badges">
         <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">1st Focus: ${a1.name} · ${a1.stat}</span>
       </div>
-      <div class="combo-desc">You are focusing on actions tailored to <strong>${a1.prompt}</strong>. Select an Archetype 2 header or grid intersection to secure your compound calling.</div>
+      <div class="combo-desc">Focusing on paths requiring you to <strong>${a1.prompt}</strong>. Select an Archetype 2 parameter to secure a compound calling. Character lists are currently filtered for targets matching ${a1.name}.</div>
       <div class="divider"></div>
       <div><div class="col-label" style="color:${a1.txt}">${a1.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id1]), a1.pill)}</div>
     `;
@@ -825,14 +806,13 @@ function renderBuilderResult() {
       <div class="arch-badges">
         <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">2nd Focus: ${a2.name} · ${a2.stat}</span>
       </div>
-      <div class="combo-desc">You are evaluating a build auxiliary to actions that <strong>${a2.prompt}</strong>. Select an Archetype 1 header or grid intersection to finalize the structure.</div>
+      <div class="combo-desc">Evaluating build tracks built on actions to <strong>${a2.prompt}</strong>. Select an Archetype 1 structural coordinate to intersect. Character list matches are adjusted for ${a2.name}.</div>
       <div class="divider"></div>
       <div><div class="col-label" style="color:${a2.txt}">${a2.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id2]), a2.pill)}</div>
     `;
     return;
   }
 
-  // Complete cross-section mapping state
   const key = getMatrixKey(id1, id2);
   const combo = MATRIX[key];
   const a1 = getA(id1), a2 = getA(id2);
@@ -891,10 +871,65 @@ function renderCharFilters() {
   });
 }
 
+function renderClearMatrixFilterBtn() {
+  const container = document.getElementById('clear-matrix-filter-container');
+  container.innerHTML = '';
+  
+  if (builderSel[0] || builderSel[1]) {
+    const btn = document.createElement('button');
+    btn.className = 'clear-filter-btn';
+    btn.textContent = '✕ Reset Matrix Filter';
+    btn.onclick = () => {
+      builderSel = [null, null];
+      activeCharId = null;
+      renderMatrix();
+      renderBuilderResult();
+      renderCharList();
+      document.getElementById('char-result').innerHTML = '<p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>';
+      renderClearMatrixFilterBtn();
+    };
+    container.appendChild(btn);
+  }
+}
+
+// Logic checks if character matches matrix filters
+function characterMatchesMatrixFilter(c) {
+  const [m1, m2] = builderSel;
+  if (!m1 && !m2) return true; // No filter active
+  
+  // Matrix intersection active
+  if (m1 && m2) {
+    return (c.archs[0] === m1 && c.archs[1] === m2) || (c.archs[0] === m2 && c.archs[1] === m1);
+  }
+  
+  // Single isolated axis active
+  const activeAxis = m1 || m2;
+  return c.archs[0] === activeAxis || c.archs[1] === activeAxis;
+}
+
+function syncSelectedCharacterFromMatrix() {
+  if (activeCharId) {
+    const currentChar = CHARS.find(c => c.id === activeCharId);
+    if (currentChar && !characterMatchesMatrixFilter(currentChar)) {
+      activeCharId = null;
+      document.getElementById('char-result').innerHTML = '<p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>';
+    }
+  }
+}
+
 function renderCharList() {
   const el = document.getElementById('char-list');
   el.innerHTML = '';
-  const list = activeGenre === 'all' ? CHARS : CHARS.filter(c => c.genre === activeGenre);
+  
+  // Cascade filters: Genre Selection -> Structural Matrix Filter
+  let list = activeGenre === 'all' ? CHARS : CHARS.filter(c => c.genre === activeGenre);
+  list = list.filter(characterMatchesMatrixFilter);
+
+  if (list.length === 0) {
+    el.innerHTML = '<div class="char-result-hint">No inspirations match this precise matrix focus.</div>';
+    return;
+  }
+
   list.forEach(c => {
     const a1 = getA(c.archs[0]);
     const a2 = getA(c.archs[1]);
@@ -913,7 +948,18 @@ function renderCharList() {
       </div>
       <span class="char-item-arch" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">${archLabel}</span>
     `;
-    item.onclick = () => { activeCharId = c.id; renderCharList(); renderCharResult(c); };
+    
+    item.onclick = () => { 
+      activeCharId = c.id; 
+      renderCharList(); 
+      renderCharResult(c);
+      
+      // Mirror Selection directly to update matrix structural selections instantly
+      builderSel = [c.archs[0], c.archs[1]];
+      renderMatrix();
+      renderBuilderResult();
+      renderClearMatrixFilterBtn();
+    };
     el.appendChild(item);
   });
 }
@@ -959,21 +1005,15 @@ function renderCharResult(c) {
     <div class="col-label" style="margin-bottom:6px">Best-fit kits & careers</div>
     ${careersHTML}
     ${c.note ? `<div class="char-r-note">${c.note}</div>` : ''}
-    <button class="load-btn" onclick="loadIntoBuilder('${c.archs[0]}','${c.archs[1]}')">Load into archetype builder ↑</button>
   `;
 }
 
-function loadIntoBuilder(id1, id2) {
-  builderSel = [id1, id2];
-  renderMatrix();
-  renderBuilderResult();
-  document.getElementById('archetype-matrix').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
+// Initial Core Execution Thread
 renderMatrix();
 renderBuilderResult();
 renderCharFilters();
 renderCharList();
+renderClearMatrixFilterBtn();
 </script>
 </body>
 </html>
