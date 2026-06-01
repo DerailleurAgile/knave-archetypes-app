@@ -610,15 +610,38 @@ window.toggleCareer = function(careerKey) {
   const idx = selectedCareers.indexOf(careerKey);
   
   if (idx > -1) {
-    // If already chosen, remove it
+    // If already chosen, remove it unconditionally
     selectedCareers.splice(idx, 1);
   } else {
-    // Strict guard check: Cap selections at two
+    // Global guard: Cap maximum active selections at 2
     if (selectedCareers.length >= 2) return;
+
+    const [id1, id2] = builderSel;
+
+    // Enforce bucket limits only when two distinct archetypes are selected
+    if (id1 && id2 && id1 !== id2) {
+      if (selectedCareers.length === 1) {
+        const existingKey = selectedCareers[0];
+        
+        const c1 = ARCH_CAREERS[id1] || [];
+        const c2 = ARCH_CAREERS[id2] || [];
+        
+        // Categorize career items based on data arrays
+        const isShared = (k) => c1.includes(k) && c2.includes(k);
+        const isPrimaryOnly = (k) => c1.includes(k) && !c2.includes(k);
+        
+        const existingType = isShared(existingKey) ? 'common' : (isPrimaryOnly(existingKey) ? 'primary' : 'secondary');
+        const newType = isShared(careerKey) ? 'common' : (isPrimaryOnly(careerKey) ? 'primary' : 'secondary');
+        
+        // Block doubling down on exclusive pools (No P+P or S+S), but ALLOW C+C (Shared)
+        if (existingType === newType && existingType !== 'common') return;
+      }
+    }
+
     selectedCareers.push(careerKey);
   }
 
-  // Re-render the active layout views to catch the changes
+  // Re-render components to propagate structural class layout updates
   renderBuilderResult();
   if (activeCharId) {
     const c = CHARS.find(ch => ch.id === activeCharId);
