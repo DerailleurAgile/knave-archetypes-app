@@ -83,6 +83,7 @@ body {
   letter-spacing: .3em;
 }
 
+/* Forces the side-by-side layout permanently, ignoring screen width */
 .two-col {
   display: grid;
   grid-template-columns: 1.3fr 1.5fr;
@@ -538,7 +539,7 @@ body {
 
   <div class="two-col">
 
-    <!-- LEFT PANEL: Character Inspiration (Primary Driver) -->
+    <!-- LEFT PANEL: Character Inspiration -->
     <div class="panel panel-left">
       <div class="panel-title">Character Inspiration</div>
 
@@ -554,7 +555,7 @@ body {
       </div>
     </div>
 
-    <!-- RIGHT PANEL: Archetype Matrix & Custom Outputs -->
+    <!-- RIGHT PANEL: Archetype Matrix -->
     <div class="panel panel-right">
       <div class="panel-title">Archetype Matrix</div>
       
@@ -694,9 +695,9 @@ function renderMatrix() {
     colHdr.innerHTML = `<span>${a.name}</span><span class="stat-lbl">${a.stat}</span>`;
     
     colHdr.addEventListener('click', () => {
+      // Clear character anchor when modifying matrix headers directly
+      activeCharId = null;
       builderSel[1] = (builderSel[1] === colId) ? null : colId;
-      // Evaluate if an exact character matching profile is unselected or lost
-      syncSelectedCharacterFromMatrix();
       renderMatrix();
       renderBuilderResult();
       renderCharList();
@@ -724,8 +725,8 @@ function renderMatrix() {
     rowHdr.innerHTML = `<span>${rArch.name}</span><span class="stat-lbl">${rArch.stat}</span>`;
     
     rowHdr.addEventListener('click', () => {
+      activeCharId = null;
       builderSel[0] = (builderSel[0] === rowId) ? null : rowId;
-      syncSelectedCharacterFromMatrix();
       renderMatrix();
       renderBuilderResult();
       renderCharList();
@@ -755,12 +756,12 @@ function renderMatrix() {
       cell.innerHTML = `<span class="cell-title">${combo.name.replace('the ', '')}</span>`;
       
       cell.addEventListener('click', () => {
+        activeCharId = null;
         if (isSelected) {
           builderSel = [null, null];
         } else {
           builderSel = [rowId, colId];
         }
-        syncSelectedCharacterFromMatrix();
         renderMatrix();
         renderBuilderResult();
         renderCharList();
@@ -878,7 +879,7 @@ function renderClearMatrixFilterBtn() {
   if (builderSel[0] || builderSel[1]) {
     const btn = document.createElement('button');
     btn.className = 'clear-filter-btn';
-    btn.textContent = '✕ Reset Matrix Filter';
+    btn.textContent = '✕ Reset Matrix';
     btn.onclick = () => {
       builderSel = [null, null];
       activeCharId = null;
@@ -892,38 +893,32 @@ function renderClearMatrixFilterBtn() {
   }
 }
 
-// Logic checks if character matches matrix filters
 function characterMatchesMatrixFilter(c) {
   const [m1, m2] = builderSel;
-  if (!m1 && !m2) return true; // No filter active
+  if (!m1 && !m2) return true;
   
-  // Matrix intersection active
   if (m1 && m2) {
     return (c.archs[0] === m1 && c.archs[1] === m2) || (c.archs[0] === m2 && c.archs[1] === m1);
   }
   
-  // Single isolated axis active
   const activeAxis = m1 || m2;
   return c.archs[0] === activeAxis || c.archs[1] === activeAxis;
-}
-
-function syncSelectedCharacterFromMatrix() {
-  if (activeCharId) {
-    const currentChar = CHARS.find(c => c.id === activeCharId);
-    if (currentChar && !characterMatchesMatrixFilter(currentChar)) {
-      activeCharId = null;
-      document.getElementById('char-result').innerHTML = '<p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>';
-    }
-  }
 }
 
 function renderCharList() {
   const el = document.getElementById('char-list');
   el.innerHTML = '';
   
-  // Cascade filters: Genre Selection -> Structural Matrix Filter
   let list = activeGenre === 'all' ? CHARS : CHARS.filter(c => c.genre === activeGenre);
-  list = list.filter(characterMatchesMatrixFilter);
+  
+  // Notice: We don't truncate the visibility of list components when a character itself *drives* the filter
+  // This allows the user to see all options within the category, highlighting cross-filters dynamically.
+  const hasMatrixFilter = (builderSel[0] || builderSel[1]);
+  const isDrivenByCharacter = activeCharId !== null;
+
+  if (!isDrivenByCharacter && hasMatrixFilter) {
+    list = list.filter(characterMatchesMatrixFilter);
+  }
 
   if (list.length === 0) {
     el.innerHTML = '<div class="char-result-hint">No inspirations match this precise matrix focus.</div>';
@@ -936,26 +931,35 @@ function renderCharList() {
     const isActive = activeCharId === c.id;
     const item = document.createElement('button');
     item.className = 'char-item' + (isActive ? ' active' : '');
+    
     if (isActive) {
       item.style.setProperty('--col-bg', a1.bg);
       item.style.setProperty('--col-border', a1.border);
     }
+    
     const archLabel = c.archs[0] === c.archs[1] ? a1.name : `${a1.name} + ${a2.name}`;
     item.innerHTML = `
       <div>
-        <div class="char-item-name">${c.name}${c.isNew ? '<span class="new-badge">new</span>' : ''}</div>
+        <div class="char-item-name">${c.name}</div>
         <div class="char-item-source">${c.source}</div>
       </div>
       <span class="char-item-arch" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">${archLabel}</span>
     `;
     
     item.onclick = () => { 
-      activeCharId = c.id; 
-      renderCharList(); 
-      renderCharResult(c);
+      if (isActive) {
+        // Toggle Un-select Execution Path
+        activeCharId = null; 
+        builderSel = [null, null];
+        document.getElementById('char-result').innerHTML = '<p class="char-result-hint">Select an iconic character profile to trace their archetype mappings and load their structural matrix footprint.</p>';
+      } else {
+        // Toggle Select & Cross-Filter Execution Path
+        activeCharId = c.id; 
+        renderCharResult(c);
+        builderSel = [c.archs[0], c.archs[1]];
+      }
       
-      // Mirror Selection directly to update matrix structural selections instantly
-      builderSel = [c.archs[0], c.archs[1]];
+      renderCharList(); 
       renderMatrix();
       renderBuilderResult();
       renderClearMatrixFilterBtn();
@@ -1008,7 +1012,7 @@ function renderCharResult(c) {
   `;
 }
 
-// Initial Core Execution Thread
+// Initial Run-Loop
 renderMatrix();
 renderBuilderResult();
 renderCharFilters();
