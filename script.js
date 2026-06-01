@@ -604,39 +604,58 @@ function renderCharResult(c) {
 }
 
 window.toggleCareer = function(careerKey) {
-  const idx = selectedCareers.indexOf(careerKey);
+  const careerIndex = selectedCareers.indexOf(careerKey);
   
-  if (idx > -1) {
-    selectedCareers.splice(idx, 1);
-  } else {
-    if (selectedCareers.length >= 2) return;
-
-    const [id1, id2] = builderSel;
-
-    if (id1 && id2 && id1 !== id2) {
-      if (selectedCareers.length === 1) {
-        const existingKey = selectedCareers[0];
-        
-        const c1 = ARCH_CAREERS[id1] || [];
-        const c2 = ARCH_CAREERS[id2] || [];
-        
-        const isShared = (k) => c1.includes(k) && c2.includes(k);
-        const isPrimaryOnly = (k) => c1.includes(k) && !c2.includes(k);
-        
-        const existingType = isShared(existingKey) ? 'common' : (isPrimaryOnly(existingKey) ? 'primary' : 'secondary');
-        const newType = isShared(careerKey) ? 'common' : (isPrimaryOnly(careerKey) ? 'primary' : 'secondary');
-        
-        if (existingType === newType && existingType !== 'common') return;
-      }
-    }
-
-    selectedCareers.push(careerKey);
+  // Rule 1: If already chosen, remove it unconditionally
+  if (careerIndex > -1) {
+    selectedCareers.splice(careerIndex, 1);
+    renderBuilderResult();
+    if (activeCharId) renderActiveCharacterDetails(); 
+    return;
+  }
+  
+  // Rule 2: Global Guard - Cap maximum active career choices at 2
+  if (selectedCareers.length >= 2) {
+    return;
   }
 
+  const [primaryArchetypeId, secondaryArchetypeId] = builderSel;
+
+  // Rule 3: Enforce career bucket constraints only when two distinct cross-sections are selected
+  if (primaryArchetypeId && secondaryArchetypeId && primaryArchetypeId !== secondaryArchetypeId) {
+    if (selectedCareers.length === 1) {
+      const existingSelectedKey = selectedCareers[0];
+      
+      const primaryCareersPool = ARCH_CAREERS[primaryArchetypeId] || [];
+      const secondaryCareersPool = ARCH_CAREERS[secondaryArchetypeId] || [];
+      
+      // Inline matching checkers
+      const isSharedCareer = (key) => primaryCareersPool.includes(key) && secondaryCareersPool.includes(key);
+      const isPrimaryExclusive = (key) => primaryCareersPool.includes(key) && !secondaryCareersPool.includes(key);
+      
+      const getCareerPoolType = (key) => {
+        if (isSharedCareer(key)) return 'shared';
+        if (isPrimaryExclusive(key)) return 'primary-exclusive';
+        return 'secondary-exclusive';
+      };
+      
+      const existingCareerPool = getCareerPoolType(existingSelectedKey);
+      const newCareerPool = getCareerPoolType(careerKey);
+      
+      // Rule 3b: Block doubling down on exclusive pools (No Primary+Primary or Secondary+Secondary), 
+      // but explicitly ALLOW selecting two Shared/Common careers.
+      if (existingCareerPool === newCareerPool && existingCareerPool !== 'shared') {
+        return;
+      }
+    }
+  }
+
+  selectedCareers.push(careerKey);
+
+  // Propagate state changes cleanly to view components
   renderBuilderResult();
   if (activeCharId) {
-    const c = CHARS.find(ch => ch.id === activeCharId);
-    if (c) renderCharResult(c);
+    renderActiveCharacterDetails();
   }
 };
 
