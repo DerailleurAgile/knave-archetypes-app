@@ -207,7 +207,7 @@ function renderBuilderResult() {
       <div class="arch-badges">
         <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">Primary Focus: ${a1.name} · ${a1.stat}</span>
       </div>
-      <div class="combo-desc">Focusing on paths requiring you to <strong>${a1.prompt}</strong>. Select a Secondary Archetype parameter to secure a compound calling. Character lists are currently filtered for targets matching ${a1.name}.</div>
+      <div class="combo-desc">Focusing on paths requiring you to <strong>${a1.prompt}</strong>. Select a Secondary Archetype parameter to secure a compound calling. Character lists are currently filtered for targets matching ${a1.name} as Primary.</div>
       <div class="divider"></div>
       <div><div class="col-label" style="color:${a1.txt}">${a1.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id1]), a1.pill)}</div>
     `;
@@ -221,7 +221,7 @@ function renderBuilderResult() {
       <div class="arch-badges">
         <span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">Secondary Focus: ${a2.name} · ${a2.stat}</span>
       </div>
-      <div class="combo-desc">Evaluating build tracks built on actions to <strong>${a2.prompt}</strong>. Select a Primary Archetype structural coordinate to intersect. Character list matches are adjusted for ${a2.name}.</div>
+      <div class="combo-desc">Evaluating build tracks built on actions to <strong>${a2.prompt}</strong>. Select a Primary Archetype structural coordinate to intersect. Character list matches are adjusted for ${a2.name} as Secondary.</div>
       <div class="divider"></div>
       <div><div class="col-label" style="color:${a2.txt}">${a2.name} Base Careers</div>${makePills(dedupe(ARCH_CAREERS[id2]), a2.pill)}</div>
     `;
@@ -311,12 +311,22 @@ function characterMatchesMatrixFilter(c) {
   const [m1, m2] = builderSel;
   if (!m1 && !m2) return true;
   
+  // Both axes selected: strict positional match
   if (m1 && m2) {
-    return (c.archs[0] === m1 && c.archs[1] === m2) || (c.archs[0] === m2 && c.archs[1] === m1);
+    return c.archs[0] === m1 && c.archs[1] === m2;
   }
   
-  const activeAxis = m1 || m2;
-  return c.archs[0] === activeAxis || c.archs[1] === activeAxis;
+  // Only Primary axis selected
+  if (m1) {
+    return c.archs[0] === m1;
+  }
+  
+  // Only Secondary axis selected
+  if (m2) {
+    return c.archs[1] === m2;
+  }
+  
+  return true;
 }
 
 function renderCharList() {
