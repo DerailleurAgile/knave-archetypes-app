@@ -510,3 +510,22 @@ body {
   font-style: italic;
   background: var(--parchment-dark);
 }
+
+/* Selectable Pill Enhancements */
+.pill {
+  cursor: pointer;
+  user-select: none;
+  transition: all .1s ease;
+}
+
+.pill:hover {
+  filter: brightness(0.92);
+  transform: translateY(-1px);
+}
+
+.pill.selected {
+  background: var(--ink) !important;
+  border-color: var(--ink) !important;
+  color: var(--parchment) !important;
+  box-shadow: 0 0 0 1px var(--parchment), 0 0 0 2px var(--ink);
+}

@@ -98,6 +98,109 @@ const ARCH_CAREERS = {
   ]
 };
 
+const CAREER_ITEMS = {
+  'acrobat':      ['Rope (50ft)', 'Chalk bag', 'Tightrope pole'],
+  'acolyte':      ['Holy water', 'Incense burner', 'Hymnal'],
+  'actor':        ['Costume suit', 'Makeup palette', 'Script scroll'],
+  'alchemist':    ['Alchemist\'s fire', 'Glass alembic', 'Mortar & pestle'],
+  'antiquarian':  ['Old coin collection', 'Magnifying glass', 'Antique map'],
+  'arcanist':     ['Blank spellbook', 'Chalk sticks', 'Inkwell & quill'],
+  'architect':    ['Blueprint rolls', 'Plumb line', 'Drawing compass'],
+  'assassin':     ['Vial of poison', 'Garrote wire', 'Disguise kit'],
+  'astrologer':   ['Star charts', 'Brass telescope', 'Ephemeris almanac'],
+  'baker':        ['Heavy rolling pin', 'Flour sack', 'Stained apron'],
+  'bandit':       ['Face hood', 'Iron crowbar', 'Stolen coin pouch'],
+  'barber':       ['Straight razor', 'Scented pomade', 'Hand mirror'],
+  'beast tamer':  ['Leather whip', 'Raw meat sack', 'High-frequency whistle'],
+  'beekeeper':    ['Smoke blower', 'Honey jar', 'Protective mesh veil'],
+  'blacksmith':   ['Heavy tongs', 'Forging hammer', 'Leather apron'],
+  'boatman':      ['Wood oar', 'Canvas tarp', 'Twine spool'],
+  'bookbinder':   ['Leather scraps', 'Glue pot', 'Bone folder tool'],
+  'brewer':       ['Small cask of ale', 'Glass hydrometer', 'Yeast packet'],
+  'burglar':      ['Lockpick set', 'Diamond glass cutter', 'Dark wool cloak'],
+  'butcher':      ['Heavy cleaver', 'Meat hook', 'Sharpening stone'],
+  'candlemaker':  ['Tallow chunk', 'Wick spool', 'Metal dipping rod'],
+  'carpenter':    ['Hand saw', 'Claw hammer', 'Iron square ruler'],
+  'charlatan':    ['Flamboyant costume', 'Fake elixir bottle', 'Forged degree'],
+  'coachman':     ['Driving whip', 'Oil lantern', 'Carriage grease tub'],
+  'cobbler':      ['Stitching awl', 'Shoe leather soles', 'Wooden last'],
+  'cook':         ['Iron pot', 'Stirring ladle', 'Rare spice pouch'],
+  'courier':      ['Leather satchel', 'Wax seal stamp', 'Iron-shod walking stick'],
+  'courtier':     ['Gold signet ring', 'Silk handkerchief', 'Vial of perfume'],
+  'cultist':      ['Ceremonial dagger', 'Ritual robes', 'Unholy amulet'],
+  'cutpurse':     ['Small shears', 'Leather purse hook', 'Coil of copper wire'],
+  'dyer':         ['Mordant vat jar', 'Concentrated dye flask', 'Stained leather gloves'],
+  'explorer':     ['Brass sextant', 'Collapsible spyglass', 'Magnetic compass'],
+  'falconer':     ['Thick leather gauntlet', 'Bird hood', 'Training whistle'],
+  'fence':        ['Magnifying lens', 'Precision small scale', 'Secret ledger'],
+  'fisherman':    ['Fishing rod', 'Tackle box', 'Braided net'],
+  'folklorist':   ['Iron protective charm', 'Field notebook', 'Rare mythos manuscript'],
+  'gambler':      ['Deck of cards', 'Pair of bone dice', 'Leather betting cup'],
+  'gamekeeper':   ['Snare wire coil', 'Signal whistle', 'Bullseye lantern'],
+  'gardener':     ['Hand trowel', 'Canvas seed pouch', 'Pruning shears'],
+  'grave robber': ['Rusty shovel', 'Dark lantern', 'Heavy canvas sack'],
+  'gravedigger':  ['Trenching shovel', 'Flat spade', 'Linen burial shroud'],
+  'groom':        ['Curry comb', 'Oats burlap bag', 'Leather halter'],
+  'guard':        ['Iron halberd', 'Livery chest badge', 'Alert whistle'],
+  'headsman':     ['Executioner\'s axe', 'Black execution hood', 'Coarse whetstone'],
+  'herbalist':    ['Dried medicinal herbs', 'Harvesting sickle', 'Herb identification manual'],
+  'hermit':       ['Gnarled wooden staff', 'Patched cloak', 'Carved holy symbol'],
+  'hunter':       ['Hunting shortbow', 'Quiver with 20 arrows', 'Skinning knife'],
+  'innkeeper':    ['Brass keg tap', 'Guest ledger book', 'Heavy master keyring'],
+  'inquisitor':   ['Iron branding rod', 'Heresy manual', 'Consecrated holy symbol'],
+  'investigator': ['Case journal', 'Inkpen & case', 'Iron manacles'],
+  'jailer':       ['Heavy dungeon keys', 'Chain manacles', 'Weighted truncheon'],
+  'jester':       ['Motley garb & bells', 'Three juggling balls', 'Pig-bladder stick'],
+  'jeweler':      ['Eye loupe', 'Jeweler\'s micro-hammer', 'Velvet display pad'],
+  'kidnapper':    ['Large burlap sack', 'Hemp rope (50ft)', 'Linen gag fabric'],
+  'knight':       ['Polished longsword', 'Heraldic heater shield', 'Riding spurs'],
+  'lawyer':       ['Heavy law tome', 'Legal brief scrolls', 'Inkwell & blotter'],
+  'locksmith':    ['Precision pick set', 'Skeleton keys', 'Fine oil can'],
+  'mason':        ['Mortar trowel', 'Stone chisel', 'Heavy wooden mallet'],
+  'merchant':     ['Transaction ledger', 'Wooden abacus', 'Handheld brass scales'],
+  'miner':        ['Heavy pickaxe', 'Oil head-lamp', 'Refining oil flask'],
+  'musician':     ['Travel instrument', 'Sheet music folio', 'Metal tuning fork'],
+  'naturalist':   ['Specimen collection jar', 'Butterfly net', 'Flora & fauna field guide'],
+  'officer':      ['Regimental uniform coat', 'Command whistle', 'Ceremonial saber'],
+  'oracle':       ['Tarot card deck', 'Incense burner burner', 'Cloudy crystal orb'],
+  'orator':       ['Proclamation scroll', 'Throat lozenges', 'Podium script sheets'],
+  'painter':      ['Wooden travel easel', 'Fine paint brushes', 'Mixing palette'],
+  'peddler':      ['Display crate', 'Cheap glass trinkets', 'Hand call bell'],
+  'philosopher':  ['Writing quill', 'Heavy philosophical book', 'Ceramic inkpot'],
+  'physician':    ['Bone saw', 'Fine scalpel', 'Rolls of clean medical bandages'],
+  'pilgrim':      ['Iron-tipped walking staff', 'Religious relic pouch', 'Sovereign letter of passage'],
+  'pirate':       ['Heavy cutlass', 'Leather eye patch', 'Fortified rum flask'],
+  'pit fighter':  ['Spiked cestus', 'Weighted throwing net', 'Barbed trident'],
+  'playwright':   ['Quill kit', 'Blank parchment rolls', 'Tragedy/Comedy theater masks'],
+  'poacher':      ['Animal masking scent', 'Poaching bow', 'Quiver with 20 arrows'],
+  'poet':         ['Travel inkwell', 'Parchment anthology rolls', 'Decorative ribbon bindings'],
+  'priest':       ['Vial of holy water', 'Liturgical holy book', 'Ceremonial vestments'],
+  'prospector':   ['Iron gold pan', 'Geological rock hammer', 'Sifting sieve'],
+  'puppeteer':    ['Carved marionette', 'Small frame curtain', 'String repair spool'],
+  'rat catcher':  ['Small wire cage', 'Terrier training whistle', 'Sack of arsenic poison'],
+  'saboteur':     ['Waterproof tinderbox', 'Black powder horn', 'Slow-burning fuse wire'],
+  'sailor':       ['Iron marlinspike', 'Tar waterproofing pot', 'Reinforced sea chest'],
+  'scout':        ['High-power spyglass', 'Camouflage foliage cloak', 'Waterproof map case'],
+  'scribe':       ['Black inkwell', 'Wax writing tablets', 'Iron stylus tool'],
+  'sculptor':     ['Marble chisel', 'Heavy mallet', 'Wet clay lump'],
+  'servant':      ['Silver serving platter', 'Feather duster', 'Tailored livery uniform'],
+  'shepherd':     ['Wooden shepherd\'s crook', 'Sheepdog whistle', 'Iron wool shears'],
+  'shipwright':   ['Hand adze tool', 'Caulking iron mallet', 'Oakum packing bundle'],
+  'singer':       ['Vocal tuning fork', 'Lyric song sheet', 'Honey throat lozenges'],
+  'smuggler':     ['False-bottomed cask', 'Darkened shutter lantern', 'Black-market bribe coins'],
+  'soldier':      ['Iron spear', 'Regimental uniform tunic', 'Hardtack iron rations'],
+  'spy':          ['Bag of caltrops', 'Vial of contact poison', 'Forged identity papers'],
+  'squire':       ['Shield oil & rags', 'Fine whetstone', 'Heraldic tabard shirt'],
+  'tailor':       ['Fabric shears', 'Needle & thread spools', 'Fabric tape measure'],
+  'tattooist':    ['Bone inking needles', 'Pigment ink pots', 'Design sketch book'],
+  'thieftaker':   ['Official bounty poster', 'Heavy iron manacles', 'Leather sap'],
+  'thug':         ['Weighted lead cosh', 'Brass knuckles', 'Face bandana'],
+  'torturer':     ['Iron thumbscrews', 'Rusted iron pincers', 'Heavy leather work apron'],
+  'trapper':      ['Toothed bear trap', 'Wood pelt stretcher', 'Skinning tool knife'],
+  'watchman':     ['Oil lantern', 'Iron-shod polearm', 'Wooden alarm rattle'],
+  'woodcutter':   ['Felling axe', 'Splitting wedge', 'Coarse sharpening stone']
+};
+
 const CHARS = [
   { id:'conan',       name:'Conan',              source:'R.E. Howard',        genre:'sword-sorcery', archs:['blade','wayfarer'], pseudo:'the ranger', desc:'Wandering barbarian — as comfortable leading a war-band as surviving alone in the wilderness. Fights first, thinks later, survives always.', careers:{ blade:['soldier','pit fighter','bandit','guard'], wayfarer:['hunter','scout','trapper','pirate'] }, note:'STR and WIS. CON third — you need those item slots.' },
   { id:'aragorn',     name:'Aragorn',             source:'Tolkien',             genre:'fantasy',       archs:['blade','wayfarer'], pseudo:'the ranger', desc:'A king who walks as a wanderer. Trained warrior, skilled tracker, and reluctant leader who knows every corner of a dangerous world.', careers:{ blade:['soldier','knight','squire','guard'], wayfarer:['hunter','scout','herbalist','courier'] }, note:'STR and WIS split. Take herbalist — it fits perfectly and gives you the foraging advantage.' },
@@ -128,6 +231,7 @@ const ALL_GENRES = ['all', ...new Set(CHARS.map(c => c.genre))];
 let builderSel = [null, null]; // [Row = Primary Archetype, Column = Secondary Archetype]
 let activeGenre = 'all';
 let activeCharId = null;
+let selectedCareers = []; // Track PC's chosen careers
 
 function getMatrixKey(a, b) {
   return `${a}-${b}`; // Pure positional coordinates: Row (Primary) - Column (Secondary)
@@ -137,7 +241,19 @@ function dedupe(arr) { return [...new Set(arr)]; }
 function getA(id) { return ARCH[id]; }
 
 function makePills(list, style) {
-  return list.map(n => `<span class="pill" style="${style}">${n}</span>`).join('');
+  return list.map(n => {
+    const key = n.toLowerCase().trim();
+    const items = CAREER_ITEMS[key];
+    const isSelected = selectedCareers.includes(key);
+    
+    const tooltipText = items 
+      ? `Starting Kit:\n• ${items.join('\n• ')}` 
+      : 'Standard career gear package';
+
+    const selectedClass = isSelected ? 'selected' : '';
+
+    return `<span class="pill ${selectedClass}" style="${style}" title="${tooltipText}" onclick="toggleCareer('${key}')">${n}</span>`;
+  }).join('');
 }
 
 function renderMatrix() {
@@ -489,6 +605,26 @@ function renderCharResult(c) {
     ${c.note ? `<div class="char-r-note">${c.note}</div>` : ''}
   `;
 }
+
+window.toggleCareer = function(careerKey) {
+  const idx = selectedCareers.indexOf(careerKey);
+  
+  if (idx > -1) {
+    // If already chosen, remove it
+    selectedCareers.splice(idx, 1);
+  } else {
+    // Strict guard check: Cap selections at two
+    if (selectedCareers.length >= 2) return;
+    selectedCareers.push(careerKey);
+  }
+
+  // Re-render the active layout views to catch the changes
+  renderBuilderResult();
+  if (activeCharId) {
+    const c = CHARS.find(ch => ch.id === activeCharId);
+    if (c) renderCharResult(c);
+  }
+};
 
 renderMatrix();
 renderBuilderResult();
