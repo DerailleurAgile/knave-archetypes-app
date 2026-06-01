@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knave 2e — Archetype Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1410;
+  --ink-faded: #4a3f35;
+  --ink-ghost: #8a7a6a;
+  --parchment: #f5eed8;
+  --parchment-dark: #e8dfc0;
+  --parchment-darker: #d4c89a;
+  --rule: #c4b48a;
+  --rule-light: #ddd0a8;
+
+  --blade-bg: #f9e8e8; --blade-border: #8b2020; --blade-txt: #5a1010; --blade-mid: #c44040;
+  --shadow-bg: #eae8f5; --shadow-border: #3a2f8a; --shadow-txt: #241d5a; --shadow-mid: #5a50b0;
+  --wayfarer-bg: #e8f0e0; --wayfarer-border: #2a5a18; --wayfarer-txt: #1a3a0a; --wayfarer-mid: #4a8a30;
+  --sage-bg: #e4eef8; --sage-border: #1a4a88; --sage-txt: #0a2a58; --sage-mid: #2a6ab8;
+  --devoted-bg: #f5e4ee; --devoted-border: #882050; --devoted-txt: #581030; --devoted-mid: #b84070;
+  --artisan-bg: #f5eedd; --artisan-border: #7a4a10; --artisan-txt: #4a2a08; --artisan-mid: #a06820;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #2a2018;
+  font-family: 'Crimson Text', Georgia, serif;
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--parchment);
+  border: 2px solid var(--rule);
+  padding: 0;
+  position: relative;
+}
+
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--rule-light);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.page-header {
+  text-align: center;
+  padding: 2.5rem 3rem 1.5rem;
+  border-bottom: 2px solid var(--rule);
+  background: var(--parchment-dark);
+}
+
+.page-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.page-header .subtitle {
+  font-size: 15px;
+  color: var(--ink-faded);
+  font-style: italic;
+}
+
+.ornament {
+  display: block;
+  text-align: center;
+  color: var(--rule);
+  font-size: 18px;
+  margin: 8px 0 4px;
+  letter-spacing: .3em;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 600px;
+}
+
+.panel {
+  padding: 1.75rem 2rem;
+}
+
+.panel-left {
+  border-right: 1.5px solid var(--rule);
+}
+
+.panel-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule-light);
+}
+
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.arch-btn {
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 8px 6px 7px;
+  cursor: pointer;
+  text-align: center;
+  background: var(--parchment);
+  transition: all .15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-family: 'Crimson Text', serif;
+}
+
+.arch-btn:hover {
+  background: var(--parchment-dark);
+  border-color: var(--ink-ghost);
+}
+
+.arch-btn.selected {
+  background: var(--col-bg);
+  border-color: var(--col-border);
+  border-width: 1.5px;
+}
+
+.arch-btn .arch-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: .04em;
+}
+
+.arch-btn.selected .arch-name { color: var(--col-txt); }
+
+.arch-btn .arch-stat {
+  font-size: 11px;
+  color: var(--ink-ghost);
+  font-style: italic;
+}
+
+.arch-btn .arch-prompt {
+  font-size: 10px;
+  color: var(--ink-ghost);
+  line-height: 1.3;
+  margin-top: 1px;
+}
+
+.step-label {
+  font-size: 12px;
+  color: var(--ink-faded);
+  font-style: italic;
+  margin-bottom: .5rem;
+}
+
+.result-box {
+  border: 1px solid var(--rule);
+  background: var(--parchment-dark);
+  padding: 1.25rem;
+  margin-top: 1rem;
+  border-radius: 3px;
+  min-height: 120px;
+}
+
+.result-hint {
+  font-size: 14px;
+  color: var(--ink-ghost);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.combo-name {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.combo-desc {
+  font-size: 14px;
+  color: var(--ink-faded);
+  line-height: 1.55;
+  margin-bottom: .75rem;
+}
+
+.combo-eg {
+  font-size: 13px;
+  color: var(--ink-ghost);
+  font-style: italic;
+}
+
+.arch-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: .75rem 0;
+}
+
+.arch-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--rule-light);
+  margin: .75rem 0;
+}
+
+.careers-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+
+.col-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--ink-ghost);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  margin: 2px 2px 2px 0;
+  border: 1px solid transparent;
+  font-family: 'Crimson Text', serif;
+}
+
+.stat-hint {
+  font-size: 13px;
+  color: var(--ink-faded);
+  font-style: italic;
+  margin-top: .5rem;
+}
+
+.divider-v {
+  width: 1.5px;
+  background: var(--rule);
+}
+
+.char-filters {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.filter-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  padding: 3px 9px;
+  border-radius: 2px;
+  border: 1px solid var(--rule);
+  background: var(--parchment);
+  color: var(--ink-faded);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .1s;
+}
+
+.filter-btn:hover { background: var(--parchment-dark); }
+.filter-btn.active { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
+
+.char-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+  padding-right: 4px;
+}
+
+.char-item {
+  border: 1px solid var(--rule-light);
+  border-radius: 3px;
+  padding: 8px 10px;
+  cursor: pointer;
+  background: var(--parchment);
+  transition: all .12s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.char-item:hover { background: var(--parchment-dark); border-color: var(--rule); }
+
+.char-item.active {
+  background: var(--col-bg, var(--parchment-dark));
+  border-color: var(--col-border, var(--rule));
+  border-width: 1.5px;
+}
+
+.char-item-name {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.char-item-source {
+  font-size: 11px;
+  color: var(--ink-ghost);
+  font-style: italic;
+}
+
+.char-item-arch {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  letter-spacing: .03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.char-result {
+  border: 1px solid var(--rule);
+  background: var(--parchment-dark);
+  padding: 1.25rem;
+  margin-top: 1rem;
+  border-radius: 3px;
+  min-height: 120px;
+}
+
+.char-result-hint {
+  font-size: 14px;
+  color: var(--ink-ghost);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.char-r-name {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.char-r-source {
+  font-size: 13px;
+  color: var(--ink-ghost);
+  font-style: italic;
+  margin-top: 2px;
+  margin-bottom: .75rem;
+}
+
+.char-r-desc {
+  font-size: 14px;
+  color: var(--ink-faded);
+  line-height: 1.55;
+  margin-bottom: .75rem;
+}
+
+.char-r-note {
+  font-size: 12px;
+  color: var(--ink-ghost);
+  font-style: italic;
+  margin-top: .75rem;
+  border-top: 1px solid var(--rule-light);
+  padding-top: .6rem;
+}
+
+.load-btn {
+  display: block;
+  width: 100%;
+  margin-top: .75rem;
+  padding: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--parchment);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+
+.load-btn:hover { opacity: .85; }
+
+.new-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: var(--wayfarer-bg);
+  color: var(--wayfarer-txt);
+  border: 1px solid var(--wayfarer-border);
+  margin-left: 5px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.flash {
+  animation: flashin .4s ease;
+}
+
+@keyframes flashin {
+  0% { opacity: .4; }
+  100% { opacity: 1; }
+}
+
+.page-footer {
+  text-align: center;
+  padding: .75rem;
+  border-top: 1px solid var(--rule-light);
+  font-size: 12px;
+  color: var(--ink-ghost);
+  font-style: italic;
+  background: var(--parchment-dark);
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>Knave 2e — Archetype Builder</h1>
+    <span class="ornament">— ✦ —</span>
+    <p class="subtitle">A class-as-kit reference for Ben Milton's <em>Knave: Second Edition</em></p>
+  </div>
+
+  <div class="two-col">
+
+    <div class="panel panel-left">
+
+      <div class="panel-title">Archetype Builder</div>
+
+      <p class="step-label">First archetype</p>
+      <div class="arch-grid" id="grid1"></div>
+
+      <p class="step-label" style="margin-top:.75rem">Second archetype</p>
+      <div class="arch-grid" id="grid2"></div>
+
+      <div class="result-box" id="builder-result">
+        <p class="result-hint">Pick two archetypes to see your pseudo-class, careers, and ability score guidance.</p>
+      </div>
+
+    </div>
+
+    <div class="panel panel-right">
+
+      <div class="panel-title">Character Inspiration</div>
+
+      <div class="char-filters" id="char-filters"></div>
+
+      <div class="char-list" id="char-list"></div>
+
+      <div class="char-result" id="char-result">
+        <p class="char-result-hint">Select a character to see their archetype mapping and best-fit careers.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    Knave: Second Edition by Ben Milton / Questing Beast LLC &nbsp;·&nbsp; This reference is an independent fan tool
+  </div>
+
+</div>
+
+<script>
+const ARCH = {
+  blade:    { name:'Blade',    stat:'STR', prompt:'fight and survive melee',        bg:'var(--blade-bg)',    border:'var(--blade-border)',    txt:'var(--blade-txt)',    mid:'var(--blade-mid)',    pill:'background:var(--blade-bg);border-color:var(--blade-border);color:var(--blade-txt)' },
+  shadow:   { name:'Shadow',   stat:'DEX', prompt:'steal, deceive, disappear',      bg:'var(--shadow-bg)',   border:'var(--shadow-border)',   txt:'var(--shadow-txt)',   mid:'var(--shadow-mid)',   pill:'background:var(--shadow-bg);border-color:var(--shadow-border);color:var(--shadow-txt)' },
+  wayfarer: { name:'Wayfarer', stat:'WIS', prompt:'track, hunt, navigate the wild', bg:'var(--wayfarer-bg)', border:'var(--wayfarer-border)', txt:'var(--wayfarer-txt)', mid:'var(--wayfarer-mid)', pill:'background:var(--wayfarer-bg);border-color:var(--wayfarer-border);color:var(--wayfarer-txt)' },
+  sage:     { name:'Sage',     stat:'INT', prompt:'uncover secrets, brew, cast',    bg:'var(--sage-bg)',     border:'var(--sage-border)',     txt:'var(--sage-txt)',     mid:'var(--sage-mid)',     pill:'background:var(--sage-bg);border-color:var(--sage-border);color:var(--sage-txt)' },
+  devoted:  { name:'Devoted',  stat:'CHA', prompt:'lead, inspire, call on patrons', bg:'var(--devoted-bg)',  border:'var(--devoted-border)',  txt:'var(--devoted-txt)',  mid:'var(--devoted-mid)',  pill:'background:var(--devoted-bg);border-color:var(--devoted-border);color:var(--devoted-txt)' },
+  artisan:  { name:'Artisan',  stat:'CON', prompt:'build, endure, master a trade',  bg:'var(--artisan-bg)',  border:'var(--artisan-border)',  txt:'var(--artisan-txt)',  mid:'var(--artisan-mid)',  pill:'background:var(--artisan-bg);border-color:var(--artisan-border);color:var(--artisan-txt)' },
+};
+
+const ARCH_ORDER = ['blade','shadow','wayfarer','sage','devoted','artisan'];
+
+const MATRIX = {
+  'blade-blade':     { name:'the veteran',           desc:'All you know is the fight. Hard-won scars and harder-won lessons. You keep going when smarter people stop.',                                                                                   eg:'Jaime Lannister, Conan, the old soldier who should have died ten years ago' },
+  'blade-shadow':    { name:'the knife in the dark',  desc:'Violence is your tool and discretion your method. You strike when your target least expects it and vanish before anyone can give it a name.',                                                    eg:'Geralt of Rivia, the quiet one at the end of the bar, an assassin-for-hire with principles' },
+  'blade-wayfarer':  { name:'the ranger',             desc:'Equally at home in the wild and the melee. You read the land like a map and move through it like a ghost — until the moment you don\'t.',                                                        eg:'Aragorn, Strider, the border-warden, a hunter who has fought too many things that fought back' },
+  'blade-sage':      { name:'the war-scholar',        desc:'You fight with a mind as sharp as your blade. You study your enemies before you meet them — and if you can\'t, you adapt.',                                                                      eg:'Tyrion with a sword, the general who leads the charge, a warrior-monk who reads battle like scripture' },
+  'blade-devoted':   { name:'the war-priest',         desc:'You serve a power greater than yourself — and demonstrate that service with iron. Faith is not passive for you.',                                                                                eg:'a Templar, a paladin who has made hard choices, a cult enforcer with genuine belief' },
+  'blade-artisan':   { name:'the pit veteran',        desc:'Tough, practical, and built to last. Not glamorous — but when things break down, you are the one still standing.',                                                                               eg:'a pit fighter who makes their own weapons, a siege engineer who also defends the wall' },
+  'shadow-shadow':   { name:'the ghost',              desc:'You barely exist. False names, false faces, false trails. You are whoever you need to be, and when you are done, you were never there.',                                                          eg:'a master spy, a con artist at the peak of their game, a thief who has never been seen' },
+  'shadow-wayfarer': { name:'the outrider',           desc:'You move fast and quiet through terrain others find impossible — and you notice things they miss. Intelligence is your weapon before blades are drawn.',                                          eg:'a frontier scout, a smuggler who knows every back-road, a poacher who knows where the game wardens sleep' },
+  'shadow-sage':     { name:'the operator',           desc:'You combine information with cunning. No plan survives contact with the enemy — but yours come close, because you thought of everything.',                                                        eg:'the face who also built the device, a poisoner who wrote the antidote, an archivist who steals secrets' },
+  'shadow-devoted':  { name:'the faithful dissembler',desc:'You serve something — god, patron, cause — but from the shadows. You are the hand that works unseen. Whether your faith is genuine or not, only you know.',                                      eg:'a spy for the church, a devotee of a trickster god, an inquisitor who uses unorthodox methods' },
+  'shadow-artisan':  { name:'the forger',             desc:'You make things — and make them look like other things. Locks, documents, artifacts, reputations. Your craft leaves no seams that anyone can find.',                                              eg:'a master forger, a thief who builds their own tools, a tinker who asks no questions' },
+  'wayfarer-wayfarer':{ name:'the wanderer',          desc:'The road is your home. You know every kind of country and how to read it. Civilization is where you resupply.',                                                                                  eg:'a lone wanderer, the traveler who has been everywhere once, a hermit who moves instead of staying' },
+  'wayfarer-sage':   { name:'the learned explorer',   desc:'You came to see the world and understand it. Every ruin has a theory. Every creature has a name — or deserves one. The wilderness is your library.',                                              eg:'Indiana Jones, Lara Croft, a naturalist who also knows how to run, a geographer who maps the unmapped' },
+  'wayfarer-devoted':{ name:'the pilgrim',            desc:'You walk a long road for a higher purpose. The journey is the discipline. You have seen more of the world than most priests and more of faith than most travelers.',                               eg:'a monk far from home, a traveling healer, a wandering prophet who means it' },
+  'wayfarer-artisan':{ name:'the frontier hand',      desc:'You know how to keep yourself alive in hard country — and how to build what you need to do it. Improvisation is your most-used tool.',                                                           eg:'a prospector who builds their own claim, a trapper who repairs their own traps, a ship\'s carpenter too long at sea' },
+  'sage-sage':       { name:'the scholar',            desc:'Knowledge is power and you intend to have all of it. You see patterns others dismiss as noise. You are probably right, and probably insufferable.',                                               eg:'a wizard past their prime, an archivist with an agenda, a polymath who never left the tower' },
+  'sage-devoted':    { name:'the theurgist',          desc:'You pursue the truth of things — including divine things. Magic, faith, and reason are not separate categories for you. They are all the same question.',                                        eg:'a cleric who studies too much, an alchemist who prays, a theologian who accidentally summoned something' },
+  'sage-artisan':    { name:'the artificer',          desc:'You build what you understand, and you understand almost everything. Your workshop is wherever you happen to be. The things you make work.',                                                      eg:'Indiana Jones (the grading side), a physician-engineer, an alchemist who makes their own equipment' },
+  'devoted-devoted': { name:'the true believer',      desc:'Everything you do, you do in service to something larger than yourself. This is either very noble or very dangerous. Probably both.',                                                             eg:'a zealot with good intentions, a high priest, a wandering saint, an inquisitor who is right' },
+  'devoted-artisan': { name:'the pastor',             desc:'You serve your community in body as well as spirit. You build things, heal things, and hold things together. You are the reason the village is still standing.',                                  eg:'a village priest who is also the doctor, a dwarven cleric-engineer, a healer who grows the herbs they use' },
+  'artisan-artisan': { name:'the tradesperson',       desc:'You are what you make. Deep expertise, patient method, and a reputation that takes decades to build. You do not brag. You do not need to.',                                                      eg:'a master craftsperson, a ship\'s engineer, a physician-surgeon, a brewer of legend' },
+};
+
+const ARCH_CAREERS = {
+  blade:    ['assassin','bandit','beast tamer','butcher','fence','gambler','grave robber','guard','headsman','inquisitor','jailer','kidnapper','knight','pit fighter','pirate','saboteur','soldier','squire','thug','torturer','watchman'],
+  shadow:   ['acrobat','actor','assassin','bandit','burglar','charlatan','coachman','courtier','cutpurse','fence','jester','kidnapper','locksmith','puppeteer','rat catcher','smuggler','spy','thieftaker','thug'],
+  wayfarer: ['beast tamer','boatman','courier','explorer','falconer','fisherman','gamekeeper','hermit','hunter','miner','naturalist','pilgrim','poacher','prospector','sailor','scout','shepherd','trapper','woodcutter'],
+  sage:     ['alchemist','antiquarian','arcanist','astrologer','bookbinder','folklorist','herbalist','investigator','naturalist','oracle','philosopher','physician','playwright','architect','scribe','inquisitor'],
+  devoted:  ['acolyte','actor','courtier','cultist','hermit','inquisitor','jester','knight','lawyer','merchant','musician','officer','oracle','orator','philosopher','pilgrim','poet','priest','singer'],
+  artisan:  ['architect','baker','barber','beekeeper','blacksmith','bookbinder','brewer','candlemaker','carpenter','cobbler','cook','dyer','gardener','gravedigger','groom','innkeeper','mason','painter','sculptor','shipwright','tailor','tattooist','woodcutter'],
+};
+
+const CHARS = [
+  { id:'conan',       name:'Conan',              source:'R.E. Howard',        genre:'sword-sorcery', archs:['blade','wayfarer'], pseudo:'the ranger',
+    desc:'Wandering barbarian — as comfortable leading a war-band as surviving alone in the wilderness. Fights first, thinks later, survives always.',
+    careers:{ blade:['soldier','pit fighter','bandit','guard'], wayfarer:['hunter','scout','trapper','pirate'] },
+    note:'STR and WIS. CON third — you need those item slots.' },
+
+  { id:'aragorn',     name:'Aragorn',             source:'Tolkien',             genre:'fantasy',       archs:['blade','wayfarer'], pseudo:'the ranger',
+    desc:'A king who walks as a wanderer. Trained warrior, skilled tracker, and reluctant leader who knows every corner of a dangerous world.',
+    careers:{ blade:['soldier','knight','squire','guard'], wayfarer:['hunter','scout','herbalist','courier'] },
+    note:'STR and WIS split. Take herbalist — it fits perfectly and gives you the foraging advantage.' },
+
+  { id:'geralt',      name:'Geralt',              source:'Sapkowski',           genre:'fantasy',       archs:['blade','sage'],     pseudo:'the war-scholar',
+    desc:'A professional monster hunter who studies his quarry before he fights it. Alchemy, precise swordwork, and a deep knowledge of things that want to kill you.',
+    careers:{ blade:['assassin','soldier','thieftaker','headsman'], sage:['alchemist','herbalist','investigator','folklorist'] },
+    note:'STR and INT. Alchemist gives the brewing setup; investigator gives the journal and manacles for contracts.' },
+
+  { id:'fafhrd',      name:'Fafhrd',              source:'Leiber',              genre:'sword-sorcery', archs:['blade','shadow'],   pseudo:'the knife in the dark',
+    desc:'Half-barbarian, half-thief, entirely unpredictable. Big enough to fight anything, charming enough to talk his way out afterward — usually.',
+    careers:{ blade:['soldier','pirate','pit fighter','bandit'], shadow:['acrobat','gambler','actor','smuggler'] },
+    note:'STR primary. A point in CHA for the performer side. Fafhrd is the more openly reckless of the two.' },
+
+  { id:'mouser',      name:'Gray Mouser',         source:'Leiber',              genre:'sword-sorcery', archs:['shadow','blade'],   pseudo:'the knife in the dark',
+    desc:'Nimble, cunning, armed with a blade he calls Scalpel. A failed wizard\'s apprentice who redirected his education toward theft and surviving Fafhrd\'s plans.',
+    careers:{ shadow:['cutpurse','burglar','acrobat','fence'], blade:['assassin','gambler','thug','locksmith'] },
+    note:'DEX primary, a point in INT for the arcane dabbling. Where Fafhrd hits hard, he hits fast.' },
+
+  { id:'elric',       name:'Elric',               source:'Moorcock',            genre:'sword-sorcery', archs:['blade','devoted'],  pseudo:'the war-priest',
+    desc:'Last emperor of a dying civilization, bound to a soul-drinking black sword and the chaos gods that empower it. Reluctant, doomed, magnificent.',
+    careers:{ blade:['soldier','knight','headsman','squire'], devoted:['cultist','oracle','arcanist','philosopher'] },
+    note:'CHA primary — his power comes from his patron relationship, not his frail body. A point in STR keeps the sword swinging.' },
+
+  { id:'gandalf',     name:'Gandalf',             source:'Tolkien',             genre:'fantasy',       archs:['devoted','sage'],   pseudo:'the theurgist',
+    desc:'A wandering wizard who moves the pieces of the world without anyone quite understanding how or why. Ancient, patient, playing a very long game.',
+    careers:{ devoted:['pilgrim','philosopher','oracle','priest'], sage:['arcanist','astrologer','folklorist','antiquarian'] },
+    note:'CHA and INT split. Pilgrim career is perfect — staff, relic, letter of passage. That\'s basically his whole kit.' },
+
+  { id:'bilbo',       name:'Bilbo / Frodo',       source:'Tolkien',             genre:'fantasy',       archs:['shadow','wayfarer'],pseudo:'the outrider',
+    desc:'An ordinary person thrust into extraordinary travel. Resourceful, quietly brave, and better at going unnoticed than anyone expects.',
+    careers:{ shadow:['burglar','cutpurse','smuggler','courier'], wayfarer:['pilgrim','scout','hermit','courier'] },
+    note:'DEX and WIS. Lean into CON for wound slots — they survive by endurance, not combat prowess.' },
+
+  { id:'indy',        name:'Indiana Jones',       source:'Spielberg / Lucas',   genre:'adventure',     archs:['sage','artisan'],   pseudo:'the artificer',
+    desc:'A professor who sprints through tombs for a living. Deep historical knowledge, practical enough to improvise under fire, surprisingly good in a brawl.',
+    careers:{ sage:['antiquarian','investigator','folklorist','astrologer'], artisan:['architect','carpenter','physician','mason'] },
+    note:'INT primary, CON secondary. Antiquarian career is him exactly — old coin, flag, lore book.' },
+
+  { id:'lara',        name:'Lara Croft',          source:'Core Design',         genre:'adventure',     archs:['wayfarer','sage'],  pseudo:'the learned explorer',
+    desc:'An archaeologist who operates in the field, alone, under fire. Navigates hostile terrain and hostile history with equal fluency.',
+    careers:{ wayfarer:['explorer','hunter','prospector','scout'], sage:['antiquarian','investigator','naturalist','arcanist'] },
+    note:'WIS and INT. Explorer career gives sextant and spyglass — exactly right. Hunter adds tent and survival gear.' },
+
+  { id:'robin',       name:'Robin Hood',          source:'English folklore',    genre:'fantasy',       archs:['wayfarer','shadow'],pseudo:'the outrider',
+    desc:'An outlaw who knows the forest better than the foresters and uses that knowledge to redistribute wealth — selectively.',
+    careers:{ wayfarer:['poacher','gamekeeper','hunter','scout'], shadow:['bandit','burglar','spy','smuggler'] },
+    note:'WIS primary — the bow runs on WIS in Knave. DEX second. Poacher career: animal scent, bow, 20 arrows.' },
+
+  { id:'zorro',       name:'Zorro / d\'Artagnan', source:'McCulley / Dumas',    genre:'adventure',     archs:['shadow','blade'],   pseudo:'the knife in the dark',
+    desc:'A duelist with a double life. Noble enough to move in court, dangerous enough to clear a room — and vain enough to leave a calling card.',
+    careers:{ shadow:['acrobat','actor','courtier','gambler'], blade:['soldier','fence','gambler','assassin'] },
+    note:'DEX primary, CHA second. Courtier covers the social mask; gambler (rapier, cards, dice) covers the duel.' },
+
+  { id:'bond',        name:'James Bond',          source:'Fleming',             genre:'thriller',      archs:['shadow','sage'],    pseudo:'the operator',
+    desc:'A government assassin with impeccable manners and a talent for being somewhere he shouldn\'t be. Gathers intelligence, eliminates targets, orders something expensive afterward.',
+    careers:{ shadow:['spy','assassin','courtier','smuggler'], sage:['investigator','alchemist','physician','arcanist'] },
+    note:'DEX and INT. Spy career (caltrops, poison, forged papers). Investigator adds the journal and manacles.' },
+
+  { id:'odysseus',    name:'Odysseus',            source:'Homer',               genre:'myth',          archs:['shadow','devoted'], pseudo:'the faithful dissembler',
+    desc:'The cleverest man in the room, always. Beloved of a goddess, cursed by a god, determined to get home by any means necessary. The plan always has three layers.',
+    careers:{ shadow:['spy','orator','actor','smuggler'], devoted:['pilgrim','oracle','priest','philosopher'] },
+    note:'CHA and DEX — he talks and maneuvers his way through everything.' },
+
+  { id:'vanhelsing',  name:'Van Helsing',         source:'Stoker',              genre:'horror',        archs:['devoted','sage'],   pseudo:'the theurgist',
+    desc:'A scholar of the supernatural who has made it his business to destroy what he studies. Faith and reason are both weapons. So is a stake.',
+    careers:{ devoted:['inquisitor','priest','pilgrim','cultist'], sage:['physician','folklorist','investigator','herbalist'] },
+    note:'CHA and INT. Priest career gives holy water and stakes out of the box. Physician adds the saw and scalpel.' },
+
+  { id:'merlin',      name:'Merlin',              source:'Arthurian legend',    genre:'fantasy',       archs:['sage','devoted'],   pseudo:'the theurgist',
+    desc:'An ancient intelligence wearing a wizard\'s disguise. Arranges the shape of kingdoms the way others arrange furniture. The magic is incidental.',
+    careers:{ sage:['arcanist','astrologer','philosopher','antiquarian'], devoted:['oracle','priest','cultist','pilgrim'] },
+    note:'INT and CHA. Arcanist gives the spellbook; astrologer adds star charts and almanac. Oracle for the tarot deck.' },
+
+  { id:'sparrow',     name:'Jack Sparrow',        source:'Disney / Verbinski',  genre:'adventure',     archs:['shadow','wayfarer'],pseudo:'the outrider',
+    desc:'A disreputable sailor who is either the luckiest fool alive or a genius pretending to be a fool. Probably both.',
+    careers:{ shadow:['pirate','gambler','smuggler','charlatan'], wayfarer:['sailor','boatman','explorer','scout'] },
+    note:'DEX and WIS. Charlatan (costume, fake elixir, degree) is too good to pass up.' },
+
+  { id:'ripley',      name:'Ellen Ripley',        source:'Scott / Cameron',     genre:'sci-fi',        archs:['artisan','blade'],  pseudo:'the pit veteran',
+    desc:'A working professional who survives through practical knowledge, cold-headed problem solving, and the willingness to do whatever the situation requires.',
+    careers:{ artisan:['shipwright','carpenter','watchman','innkeeper'], blade:['soldier','guard','thieftaker','saboteur'] },
+    note:'CON primary — she endures. STR second. Shipwright (drill, hammer, axe) covers her technical competence.' },
+
+  { id:'constantine', name:'John Constantine',    source:'DC / Vertigo',        genre:'horror',        archs:['shadow','devoted'], pseudo:'the faithful dissembler', isNew:true,
+    desc:'Knows evil intimately — often because he caused it. Defeats it through manipulation, debt-collection, and exploiting rules that most people don\'t know exist. His faith is real but it isn\'t clean.',
+    careers:{ shadow:['spy','charlatan','smuggler','cultist'], devoted:['priest','oracle','inquisitor','pilgrim'] },
+    note:'CHA primary, then split DEX and INT. Cultist career (dagger, ritual robes, amulet) is his kit exactly.' },
+
+  { id:'cadfael',     name:'Brother Cadfael',     source:'Ellis Peters',        genre:'mystery',       archs:['devoted','sage'],   pseudo:'the theurgist', isNew:true,
+    desc:'A monk who spent half his life as a soldier before finding God — and then found that God had use for a man who understood both herbalism and homicide.',
+    careers:{ devoted:['priest','acolyte','pilgrim','philosopher'], sage:['herbalist','physician','investigator','naturalist'] },
+    note:'CHA and INT. Herbalist career (herbs, sickle, herb manual) is his primary toolkit.' },
+
+  { id:'tuck',        name:'Friar Tuck',          source:'English folklore',    genre:'fantasy',       archs:['devoted','artisan'],pseudo:'the pastor', isNew:true,
+    desc:'A man of God who is also a man of the people — and the ale, and the table, and the occasional brawl. Builds things, feeds people, and keeps the community standing.',
+    careers:{ devoted:['priest','acolyte','pilgrim','hermit'], artisan:['cook','brewer','carpenter','innkeeper'] },
+    note:'CHA primary, CON second. Brewer (mash paddle, beer keg, hops) is him exactly. Cook adds the frying pan.' },
+
+  { id:'melisandre',  name:'Melisandre',          source:'G.R.R. Martin',       genre:'fantasy',       archs:['devoted','devoted'],pseudo:'the true believer', isNew:true,
+    desc:'Pure faith, pure fire, pure conviction. She serves her patron absolutely and is rewarded — or punished — in kind. No separation between what she wants and what her god wants.',
+    careers:{ devoted:['cultist','oracle','priest','inquisitor'] },
+    note:'CHA — all three points if possible. Her patron blessings scale with CHA, and she intends to have many.' },
+];
+
+const ALL_GENRES = ['all', ...new Set(CHARS.map(c => c.genre))];
+
+let builderSel = [null, null];
+let activeGenre = 'all';
+let activeCharId = null;
+
+function getMatrixKey(a, b) {
+  const i = ARCH_ORDER.indexOf(a), j = ARCH_ORDER.indexOf(b);
+  return i <= j ? `${a}-${b}` : `${b}-${a}`;
+}
+
+function dedupe(arr) { return [...new Set(arr)]; }
+function getA(id) { return ARCH[id]; }
+
+function makePills(list, style) {
+  return list.map(n => `<span class="pill" style="${style}">${n}</span>`).join('');
+}
+
+function renderBuilderGrids() {
+  ['grid1','grid2'].forEach((gridId, which) => {
+    const el = document.getElementById(gridId);
+    el.innerHTML = '';
+    ARCH_ORDER.forEach(id => {
+      const a = ARCH[id];
+      const sel = builderSel[which] === id;
+      const btn = document.createElement('button');
+      btn.className = 'arch-btn' + (sel ? ' selected' : '');
+      if (sel) {
+        btn.style.setProperty('--col-bg', a.bg);
+        btn.style.setProperty('--col-border', a.border);
+        btn.style.setProperty('--col-txt', a.txt);
+      }
+      btn.innerHTML = `<span class="arch-name">${a.name}</span><span class="arch-stat">${a.stat}</span><span class="arch-prompt">${a.prompt}</span>`;
+      btn.addEventListener('click', () => {
+        builderSel[which] = id;
+        renderBuilderGrids();
+        renderBuilderResult();
+      });
+      el.appendChild(btn);
+    });
+  });
+}
+
+function renderBuilderResult() {
+  const el = document.getElementById('builder-result');
+  const [id1, id2] = builderSel;
+  if (!id1 || !id2) {
+    el.innerHTML = '<p class="result-hint">Pick two archetypes to see your pseudo-class, careers, and ability score guidance.</p>';
+    return;
+  }
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 400);
+
+  const key = getMatrixKey(id1, id2);
+  const combo = MATRIX[key];
+  const a1 = getA(id1), a2 = getA(id2);
+  const same = id1 === id2;
+
+  const c1 = dedupe(ARCH_CAREERS[id1]);
+  const c2 = same ? [] : dedupe(ARCH_CAREERS[id2]);
+  const shared = same ? [] : c1.filter(c => c2.includes(c));
+  const only1 = c1.filter(c => !shared.includes(c));
+  const only2 = c2.filter(c => !shared.includes(c));
+
+  const badgeHTML = `
+    <div class="arch-badges">
+      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">${a1.name} · ${a1.stat}</span>
+      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">${a2.name} · ${a2.stat}</span>` : ''}
+    </div>`;
+
+  let careersHTML;
+  if (same) {
+    careersHTML = `<div><div class="col-label" style="color:${a1.txt}">${a1.name} careers</div>${makePills(only1, a1.pill)}</div>`;
+  } else {
+    const sharedSec = shared.length ? `<div style="margin-top:.6rem"><div class="col-label">shared by both</div>${makePills(shared,'background:var(--parchment);border-color:var(--rule);color:var(--ink-faded)')}</div>` : '';
+    careersHTML = `
+      <div class="careers-cols">
+        <div><div class="col-label" style="color:${a1.txt}">${a1.name}</div>${makePills(only1, a1.pill)}</div>
+        <div><div class="col-label" style="color:${a2.txt}">${a2.name}</div>${makePills(only2, a2.pill)}</div>
+      </div>
+      ${sharedSec}`;
+  }
+
+  const statLine = same
+    ? `<p class="stat-hint">Primary stat: ${a1.stat} — put your points here first.</p>`
+    : `<p class="stat-hint">Primary stats: ${a1.stat} + ${a2.stat} — split your 3 points between these.</p>`;
+
+  el.innerHTML = `
+    <div class="combo-name">${combo.name}</div>
+    ${badgeHTML}
+    <div class="combo-desc">${combo.desc}</div>
+    <div class="combo-eg">e.g. ${combo.eg}</div>
+    <div class="divider"></div>
+    ${statLine}
+    <div class="divider"></div>
+    ${careersHTML}
+  `;
+}
+
+function renderCharFilters() {
+  const el = document.getElementById('char-filters');
+  el.innerHTML = '';
+  ALL_GENRES.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (activeGenre === g ? ' active' : '');
+    btn.textContent = g === 'all' ? 'all' : g;
+    btn.onclick = () => { activeGenre = g; renderCharFilters(); renderCharList(); };
+    el.appendChild(btn);
+  });
+}
+
+function renderCharList() {
+  const el = document.getElementById('char-list');
+  el.innerHTML = '';
+  const list = activeGenre === 'all' ? CHARS : CHARS.filter(c => c.genre === activeGenre);
+  list.forEach(c => {
+    const a1 = getA(c.archs[0]);
+    const a2 = getA(c.archs[1]);
+    const isActive = activeCharId === c.id;
+    const item = document.createElement('button');
+    item.className = 'char-item' + (isActive ? ' active' : '');
+    if (isActive) {
+      item.style.setProperty('--col-bg', a1.bg);
+      item.style.setProperty('--col-border', a1.border);
+    }
+    const archLabel = c.archs[0] === c.archs[1] ? a1.name : `${a1.name} + ${a2.name}`;
+    item.innerHTML = `
+      <div>
+        <div class="char-item-name">${c.name}${c.isNew ? '<span class="new-badge">new</span>' : ''}</div>
+        <div class="char-item-source">${c.source}</div>
+      </div>
+      <span class="char-item-arch" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">${archLabel}</span>
+    `;
+    item.onclick = () => { activeCharId = c.id; renderCharList(); renderCharResult(c); };
+    el.appendChild(item);
+  });
+}
+
+function renderCharResult(c) {
+  const el = document.getElementById('char-result');
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 400);
+
+  const a1 = getA(c.archs[0]), a2 = getA(c.archs[1]);
+  const same = c.archs[0] === c.archs[1];
+  const all1 = c.careers[c.archs[0]] || [];
+  const all2 = same ? [] : (c.careers[c.archs[1]] || []);
+  const shared = all1.filter(x => all2.includes(x));
+  const only1 = all1.filter(x => !shared.includes(x));
+  const only2 = all2.filter(x => !shared.includes(x));
+
+  let careersHTML;
+  if (same) {
+    careersHTML = `<div><div class="col-label" style="color:${a1.txt}">${a1.name} careers</div>${makePills(all1, a1.pill)}</div>`;
+  } else {
+    const sharedSec = shared.length ? `<div style="margin-top:.6rem"><div class="col-label">shared</div>${makePills(shared,'background:var(--parchment);border-color:var(--rule);color:var(--ink-faded)')}</div>` : '';
+    careersHTML = `
+      <div class="careers-cols">
+        <div><div class="col-label" style="color:${a1.txt}">${a1.name}</div>${makePills(only1, a1.pill)}</div>
+        ${!same ? `<div><div class="col-label" style="color:${a2.txt}">${a2.name}</div>${makePills(only2, a2.pill)}</div>` : ''}
+      </div>
+      ${sharedSec}`;
+  }
+
+  el.innerHTML = `
+    <div class="char-r-name">${c.name}</div>
+    <div class="char-r-source">${c.source} — <em>${c.pseudo}</em></div>
+    <div class="arch-badges">
+      <span class="arch-badge" style="background:${a1.bg};border-color:${a1.border};color:${a1.txt}">${a1.name} · ${a1.stat}</span>
+      ${!same ? `<span class="arch-badge" style="background:${a2.bg};border-color:${a2.border};color:${a2.txt}">${a2.name} · ${a2.stat}</span>` : ''}
+    </div>
+    <div class="char-r-desc">${c.desc}</div>
+    <div class="divider"></div>
+    <div class="col-label" style="margin-bottom:6px">Best-fit careers</div>
+    ${careersHTML}
+    ${c.note ? `<div class="char-r-note">${c.note}</div>` : ''}
+    <button class="load-btn" onclick="loadIntoBuilder('${c.archs[0]}','${c.archs[1]}')">Load into archetype builder ↑</button>
+  `;
+}
+
+function loadIntoBuilder(id1, id2) {
+  builderSel = [id1, id2];
+  renderBuilderGrids();
+  renderBuilderResult();
+  document.getElementById('grid1').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+renderBuilderGrids();
+renderBuilderResult();
+renderCharFilters();
+renderCharList();
+</script>
+</body>
+</html>
