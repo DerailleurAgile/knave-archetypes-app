@@ -195,6 +195,16 @@ body {
 }
 
 .matrix-cell {
+  /* 1. Small-caps styling */
+  font-variant: small-caps;
+  
+  /* 2. Centering (Horizontal) */
+  text-align: center;
+  
+  /* 3. Aggressive word-wrapping for tight grid boundaries */
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word; /* Safe fallback for older engines */
   background: var(--parchment);
   border: 1px solid var(--rule-light);
   border-radius: 3px;
