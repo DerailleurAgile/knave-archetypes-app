@@ -265,11 +265,12 @@ function validateStepCompletion() {
     case 1:
       isStepValid = (wizardState.primaryArch !== null && wizardState.secondaryArch !== null);
       break;
-    case 2:
+    case 2: {
       const primaryStatKey = ARCH[wizardState.primaryArch].stat;
       const allocatedToPrimary = wizardState.attributes[primaryStatKey];
       isStepValid = (wizardState.pointsToDistribute === 0 && allocatedToPrimary >= 2);
       break;
+    }
     case 3:
       isStepValid = (wizardState.selectedCareers.length === 2);
       break;
@@ -312,31 +313,48 @@ function renderMatrix() {
   const order = ['blade', 'shadow', 'endurer', 'sage', 'wayfarer', 'devoted'];
   matrixGridElement.innerHTML = '';
 
-  // Extract primary/secondary selection state from your builderSel array safely
-  const [primaryId, secondaryId] = (typeof builderSel !== 'undefined') ? builderSel : [null, null];
+  // Read selection state from wizardState (single source of truth)
+  const primaryId = wizardState.primaryArch;
+  const secondaryId = wizardState.secondaryArch;
 
-  // Corner Spacer Cell (Primary Rows vs Secondary Columns)
+  // Corner Spacer Cell
   const cornerLabel = document.createElement('div');
-  cornerLabel.className = 'matrix-header cell-header-corner';
+  cornerLabel.className = 'matrix-corner';
   cornerLabel.innerText = 'P \\ S';
   matrixGridElement.appendChild(cornerLabel);
 
-  // Column Headers (Secondary Axis Mapping)
+  // Column Headers (Secondary Axis)
   order.forEach(colKey => {
     const colHeader = document.createElement('div');
-    colHeader.className = 'matrix-header cell-header-col';
-    if (secondaryId === colKey) colHeader.classList.add('highlight-axis');
-    colHeader.innerText = ARCH[colKey].name;
+    colHeader.className = 'matrix-hdr-col';
+    if (secondaryId === colKey) {
+      colHeader.classList.add('highlighted-x');
+      colHeader.style.setProperty('--col-bg', ARCH[colKey].bg);
+      colHeader.style.setProperty('--col-border', ARCH[colKey].border);
+      colHeader.style.setProperty('--col-txt', ARCH[colKey].txt);
+    }
+    colHeader.innerHTML = `${ARCH[colKey].name}<span class="stat-lbl">${ARCH[colKey].stat}</span>`;
+    colHeader.onclick = () => {
+      if (wizardState.primaryArch) selectMatrixCoordinate(wizardState.primaryArch, colKey);
+    };
     matrixGridElement.appendChild(colHeader);
   });
 
-  // Build out Rows and Cells sequentially
+  // Rows
   order.forEach(rowKey => {
-    // Row Header (Primary Axis Mapping)
+    // Row Header (Primary Axis)
     const rowHeader = document.createElement('div');
-    rowHeader.className = 'matrix-header cell-header-row';
-    if (primaryId === rowKey) rowHeader.classList.add('highlight-axis');
-    rowHeader.innerText = ARCH[rowKey].name;
+    rowHeader.className = 'matrix-hdr-row';
+    if (primaryId === rowKey) {
+      rowHeader.classList.add('highlighted-y');
+      rowHeader.style.setProperty('--col-bg', ARCH[rowKey].bg);
+      rowHeader.style.setProperty('--col-border', ARCH[rowKey].border);
+      rowHeader.style.setProperty('--col-txt', ARCH[rowKey].txt);
+    }
+    rowHeader.innerHTML = `${ARCH[rowKey].name}<span class="stat-lbl">${ARCH[rowKey].stat}</span>`;
+    rowHeader.onclick = () => {
+      if (wizardState.secondaryArch) selectMatrixCoordinate(rowKey, wizardState.secondaryArch);
+    };
     matrixGridElement.appendChild(rowHeader);
 
     // Matrix Intersections
@@ -353,21 +371,18 @@ function renderMatrix() {
 
       const isSelectedCell = (primaryId === rowKey && secondaryId === colKey);
       if (isSelectedCell) {
-        cell.classList.add('active-coordinate');
+        cell.classList.add('selected');
+        cell.style.setProperty('--col-bg', ARCH[rowKey].bg);
+        cell.style.setProperty('--col-border', ARCH[rowKey].border);
+        cell.style.setProperty('--col-txt', ARCH[rowKey].txt);
         cell.style.background = ARCH[rowKey].mid;
         cell.style.borderColor = ARCH[rowKey].border;
         cell.style.color = '#ffffff';
       } else {
-        // Keep your subtle cross-gradient layout background calculation
         cell.style.background = `linear-gradient(135deg, ${ARCH[rowKey].bg} 0%, ${ARCH[colKey].bg} 100%)`;
       }
 
-      // Safely wire clicking behaviors back into the coordinate selections
-      if (typeof selectMatrixCoordinate === 'function') {
-        cell.onclick = () => selectMatrixCoordinate(rowKey, colKey);
-      } else if (typeof selectCoordinate === 'function') {
-        cell.onclick = () => selectCoordinate(rowKey, colKey);
-      }
+      cell.onclick = () => selectMatrixCoordinate(rowKey, colKey);
 
       matrixGridElement.appendChild(cell);
     });
@@ -414,11 +429,15 @@ function initAttributeAllocation() {
   
   const primaryStat = ARCH[wizardState.primaryArch].stat;
   const secondaryStat = ARCH[wizardState.secondaryArch].stat;
+  const isSameArch = wizardState.primaryArch === wizardState.secondaryArch;
 
   Object.keys(wizardState.attributes).forEach(stat => {
     let tag = '';
-    if (stat === primaryStat) tag = ' <small style="color:var(--blade-border); font-weight:bold;">(Primary: Require ≥ 2)</small>';
-    else if (stat === secondaryStat) tag = ' <small style="color:var(--sage-border); font-weight:bold;">(Secondary)</small>';
+    if (stat === primaryStat) {
+      tag = ' <small style="color:var(--blade-border); font-weight:bold;">(Primary — assign ≥ 2)</small>';
+    } else if (stat === secondaryStat && !isSameArch) {
+      tag = ' <small style="color:var(--sage-border); font-weight:bold;">(Secondary)</small>';
+    }
 
     const div = document.createElement('div');
     div.className = 'stat-row';
@@ -585,24 +604,35 @@ function initEquipmentSummary() {
 
 window.rollStockGold = function() {
   if (wizardState.hasRolledProvisions) {
-    alert('Provisions, tools, and starting coin have already been rolled for this character.');
+    alert('Provisions and starting coin have already been rolled for this character.');
     return;
   }
 
-  // Knave 2e Core Rule: Roll 3d6 for baseline copper pieces
-  const standardDiceRollResult = (Math.floor(Math.random() * 6) + 1) + 
-                                 (Math.floor(Math.random() * 6) + 1) + 
-                                 (Math.floor(Math.random() * 6) + 1);
+  const roll = (Math.floor(Math.random() * 6) + 1) +
+               (Math.floor(Math.random() * 6) + 1) +
+               (Math.floor(Math.random() * 6) + 1);
 
-  // Core Provision Bundle Packages
-  const baselineProvisions = ['3d6 Coins (' + standardDiceRollResult + ' Copper)', '2 Rations', "50' Rope", '2 Torches'];
-  
-  baselineProvisions.forEach(provisionItem => {
-    wizardState.inventory.push(provisionItem);
-  });
+  // Per Knave 2e: 3d6×10 coins, 2 rations, 50' rope, 2 torches
+  const provisions = [
+    `${roll * 10} Coins (${roll}×10c)`,
+    '2 Rations',
+    "50' Rope",
+    '2 Torches'
+  ];
 
+  provisions.forEach(item => wizardState.inventory.push(item));
   wizardState.hasRolledProvisions = true;
-  initEquipmentSummary(); // Re-render text panel listings
+
+  // Re-render gear list without resetting inventory
+  const gearListContainer = document.getElementById('career-gear-list');
+  if (gearListContainer) {
+    gearListContainer.innerHTML = `
+      <ul style="padding-left: 1.25rem; margin: 0 0 1rem 0; line-height: 1.6; color: var(--ink-faded);">
+        ${wizardState.inventory.map(item => `<li><strong>${item}</strong></li>`).join('')}
+      </ul>
+    `;
+  }
+  refreshInventoryDisplay();
 };
 
 function refreshInventoryDisplay() {
@@ -638,10 +668,9 @@ function refreshInventoryDisplay() {
     inventoryGridElement.appendChild(rowDiv);
   }
   
-  // Visual alert feedback warnings if player scales past carry capacity barriers
+  // Visual alert if inventory exceeds carry capacity
   if (itemsCurrentlyInInventory > configuredMaxCarryCapacity) {
     if (currentSlotsTracker) currentSlotsTracker.style.color = 'var(--blade-border)';
-    rowDiv.style.borderColor = 'var(--blade-border)';
   } else {
     if (currentSlotsTracker) currentSlotsTracker.style.color = 'inherit';
   }
