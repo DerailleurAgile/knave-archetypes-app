@@ -367,7 +367,13 @@ function renderMatrix() {
       const coordinateData = MATRIX[cellKey];
       
       // Inject the explicit customized name from your discrete matrix configuration
-      cell.innerText = coordinateData ? coordinateData.name : '';
+      // cell.innerText = coordinateData ? coordinateData.name : '';
+
+      if (coordinateData) {
+        cell.innerHTML = `<span class="cell-title">${coordinateData.name}</span>`;
+      } else {
+        cell.innerHTML = '';
+      }
 
       const isSelectedCell = (primaryId === rowKey && secondaryId === colKey);
       if (isSelectedCell) {
