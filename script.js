@@ -11,6 +11,60 @@ const ARCH = {
   devoted:  { name: 'Devoted',  stat: 'CHA', prompt: 'lead, command, channel, and persuade',      bg: 'var(--devoted-bg)',  border: 'var(--devoted-border)',  txt: 'var(--devoted-txt)',  mid: 'var(--devoted-mid)',  pill: 'background:var(--devoted-bg);border-color:var(--devoted-border);color:var(--devoted-txt)' }
 };
 
+// DIRECTION-SENSITIVE MATRIX — all 36 cells unique
+// Key: 'PRIMARY-SECONDARY' (Row = Primary, Column = Secondary)
+const MATRIX = {
+  // ── DIAGONALS ────────────────────────────────────────────────────────────
+  'blade-blade':       { name:'the veteran',          desc:'All you know is the fight. Hard-won scars and harder-won lessons. You have been hit by everything and you are still here.',                                                                       eg:'Jaime Lannister, Conan, the old soldier who should have died ten years ago, a retired pit champion' },
+  'shadow-shadow':     { name:'the ghost',             desc:'You barely exist. False names, false faces, false trails. You are whoever the moment requires, and when it is over, you were never there.',                                                       eg:'a master spy, a con artist at the peak of their game, a thief who has never once been seen' },
+  'endurer-endurer':   { name:'the survivor',          desc:'You do not overcome hardship. You outlast it. Cold, poison, starvation, injury — you absorb everything and keep moving. You are the last one left.',                                             eg:'a castaway who walked home, a prisoner who outlasted their captors, a hermit who has not been warm in a decade' },
+  'sage-sage':         { name:'the scholar',           desc:'Knowledge is power and you intend to have all of it. You see patterns others dismiss as noise. You are probably right and probably insufferable about it.',                                        eg:'a wizard past their prime, an archivist with an agenda, a polymath who never left the tower' },
+  'wayfarer-wayfarer': { name:'the wanderer',          desc:'The road is your home. You know every kind of country and how to read it. You do not pass through the wilderness — you live in it.',                                                               eg:'a lone wanderer, a scout who stopped reporting in, a hermit who moves rather than stays' },
+  'devoted-devoted':   { name:'the true believer',     desc:'Everything you do, you do in service to something larger than yourself. Your patron, cause, or creed is not a tool — it is the point. This is either very noble or very dangerous.',              eg:'a zealot with genuinely good intentions, a wandering saint, a high priest who has seen too much to doubt' },
+
+  // ── BLADE PRIMARY ────────────────────────────────────────────────────────
+  'blade-shadow':      { name:'the skirmisher',        desc:'You fight dirty. Steel and misdirection working together — feints, improvised weapons, sand in the eyes. You do not win fights cleanly; you win them decisively.',                                eg:'Bronn of the Blackwater, a cynical mercenary who fights to win, an arena fighter who has no honor and no wounds' },
+  'blade-endurer':     { name:'the iron wall',         desc:'You absorb punishment that would break anyone else and keep fighting. You are not fast and not subtle — you are the last person standing at the end of a long, ugly engagement.',                  eg:'a siege anchor, a shield-bearer who holds the line, a pit fighter who just will not go down' },
+  'blade-sage':        { name:'the war-scholar',       desc:'You study your enemies before you meet them. Combat is a problem with a correct solution and you work it out in advance. If you cannot, you adapt faster than they do.',                           eg:'a general who leads from the front, a warrior-monk who reads battle like scripture, a duelist who fights twice — once on paper, once in the yard' },
+  'blade-wayfarer':    { name:'the warden',            desc:'You fight in the field, not on formal ground. You read terrain the way other soldiers read formations and use it as a weapon. The wild is your tactical advantage.',                               eg:'Aragorn as Strider, a border-guard who knows every pass, a ranger who has been at war with the forest for a decade' },
+  'blade-devoted':     { name:'the templar',           desc:'Your sword is consecrated to a higher cause. You are a frontline crusader — violence as direct expression of holy decree, sovereign law, or ancient oath. Faith that can split armor.',            eg:'a paladin who has made hard choices, a holy executioner, a knight-militant bound by blood oaths' },
+
+  // ── SHADOW PRIMARY ───────────────────────────────────────────────────────
+  'shadow-blade':      { name:'the knife in the dark', desc:'You do not trade blows across a field. You slip past defenses and settle the matter with a single precise strike before anyone knows the fight has started. Violence as surgery.',                 eg:'an assassin-for-hire with a code, a syndicate cleaner, a duelist who never gives their target a fair chance' },
+  'shadow-endurer':    { name:'the escape artist',     desc:'You get caught. That is part of the plan. What sets you apart is that you always get out — through pain, improvisation, and sheer refusal to stay where they put you.',                            eg:'a thief who treats prison as a revolving door, an operative who can walk away from anything, a spy who has been tortured and talked their way free' },
+  'shadow-sage':       { name:'the mastermind',        desc:'You do not improvise. You prepare. Every identity is tailored, every exit pre-arranged, every guard bribed in advance. No plan survives contact with the enemy — except yours.',                   eg:'a spymaster, a high-stakes con artist who has never been caught, a black-market archivist who sells leverage' },
+  'shadow-wayfarer':   { name:'the outrider',          desc:'You use terrain the way others use shadows — as cover, corridor, and escape route. You move fast and quiet through country that stops everyone else.',                                             eg:'a smuggler who knows every back-road and hidden ford, a poacher who knows where the wardens sleep, a frontier scout who reports to no one' },
+  'shadow-devoted':    { name:'the silent hand',       desc:'You carry out the unacknowledged will of your faith or patron from the dark. You are the shadow the altar casts. Whether your belief is genuine is between you and your god.',                     eg:'a spy for the church, an assassin for a trickster cult, a saboteur whose order cannot publicly acknowledge them' },
+
+  // ── ENDURER PRIMARY ──────────────────────────────────────────────────────
+  'endurer-blade':     { name:'the juggernaut',        desc:'You absorb the hit. Then you hit back. You are not a finesse fighter — you are a force of nature that has decided to move in one direction and has not stopped yet.',                               eg:'a berserker who cannot be put down, a wrestler who fights through broken ribs, a soldier who took three arrows and kept the wall' },
+  'endurer-shadow':    { name:'the feral',             desc:'You survive by instinct and speed. Where others plan, you react. Cornered, you become unpredictable. You are difficult to catch, difficult to hold, and difficult to kill.',                       eg:'a wilderness fugitive, a street rat who grew up hard, a scout who operates too far from support to do anything but adapt' },
+  'endurer-sage':      { name:'the field scholar',     desc:'You go where the knowledge is, no matter the conditions. Cold, altitude, hostile territory — you endure it because what you find there is worth it. You come back with things no one else has.',    eg:'Indiana Jones, a field physician who works in war zones, a naturalist who winters in the mountains to study migration' },
+  'endurer-wayfarer':  { name:'the deepwalker',        desc:'You go further than anyone else and you come back. Your body is built for distance and deprivation; your instincts keep you alive in places where maps run out.',                                   eg:'a long-range pathfinder, an explorer who crossed the desert on foot, a diver who holds their breath too long and always surfaces' },
+  'endurer-devoted':   { name:'the immovable',         desc:'Your faith is structural. It does not inspire — it anchors. You are the one the party looks to when everything is falling apart, not because you have answers, but because you have not moved.',    eg:'a confessor who absorbed a century of other people\'s despair and kept going, a martyr-in-waiting who refuses to be one' },
+
+  // ── SAGE PRIMARY ─────────────────────────────────────────────────────────
+  'sage-blade':        { name:'the spellsword',        desc:'You picked up a weapon to protect your work. You see combat as a technical problem and magic as a force multiplier. You are not the strongest fighter in the room — but you are the most prepared.',  eg:'an occult investigator, a scholar who guards forbidden grimoires with steel, an academic duelist who fights with annotations in the margins' },
+  'sage-shadow':       { name:'the apostate',          desc:'You use your expertise to take things that are not yours. Research methods to locate the target; tradecraft to extract it. You are a thief who knows exactly what they are stealing and why it matters.', eg:'a defrocked alchemist who sells what the guild will not, an archivist who forges lineage papers, a thief of library vaults' },
+  'sage-endurer':      { name:'the artificer',         desc:'You build things that last because you understand the principles behind them. Theory translated into durable physical objects — engines, instruments, fortifications, potions that actually work.',     eg:'a clockwork engineer, a siege architect, a physician who designs their own instruments, a brewer whose recipes are documented' },
+  'sage-wayfarer':     { name:'the field naturalist',  desc:'You systematize the world. You venture out of towers to catalog venomous flora, track migrations, analyze geological fractures, and document things that have no names yet.',                         eg:'an academic cartographer, a toxicologist collecting field samples, a naturalist who names the creature that tries to eat them' },
+  'sage-devoted':      { name:'the theurgist',         desc:'Magic, faith, and reason are not separate fields for you. They are the same engine viewed from different angles. You study miracles the way an engineer studies a bridge — to understand the load.',    eg:'an alchemist who prays over the crucible, a cleric who knows too much to be orthodox, Van Helsing' },
+
+  // ── WAYFARER PRIMARY ─────────────────────────────────────────────────────
+  'wayfarer-blade':    { name:'the beast-slayer',      desc:'You track dangerous quarry and close with it. You treat dangerous creatures as apex predators to study, trap, and fight on their own terms — not yours.',                                           eg:'a monster hunter, a deep-woods tracker who had to learn to fight when the thing fought back, Kraven the Hunter' },
+  'wayfarer-shadow':   { name:'the poacher',           desc:'You take what the crown says belongs to them. You move through the forest silently, set camouflaged snares, and disappear before the wardens know you were there.',                                  eg:'Robin Hood, a forest outlaw, a grey-market trapper who sells what they catch to the wrong people' },
+  'wayfarer-endurer':  { name:'the pathfinder',        desc:'You navigate extreme terrain and you survive it. Other scouts map what is safe; you map what is not, because someone has to know where the passes are before the army uses them.',                    eg:'a long-range wilderness scout, a mountain guide who has lost toes and keeps climbing, a sailor who charts the dangerous coast' },
+  'wayfarer-sage':     { name:'the cartographer',      desc:'You observe the world systematically. Every hex has a theory; every creature deserves a name. You perceive things and then categorize them, because knowledge without order is noise.',               eg:'Lara Croft, a naturalist-explorer, a geographer who maps anomalous zones and annotates what killed their predecessors' },
+  'wayfarer-devoted':  { name:'the oracle',            desc:'You read the world as a text. Weather, terrain, the behavior of animals — all of it is meaningful. You perceive signs and you speak their meaning to those who will listen, or will not.',            eg:'a seer who reads the land, a wandering prophet who is usually right, a shaman whose omens have a frustrating tendency to be correct' },
+
+  // ── DEVOTED PRIMARY ───────────────────────────────────────────────────────
+  'devoted-blade':     { name:'the zealot',            desc:'Your conviction has an edge. You do not wait for the institution to act — you pick up the iron yourself. Whether that is justice or fanaticism depends on who is asking.',                           eg:'an inquisitor who hunts personally, a religious enforcer, a warrior vindicating a broken oath in front of God' },
+  'devoted-shadow':    { name:'the heretic',           desc:'You keep a banned faith alive. Cells, coded messages, midnight rites — you operate below the surface of an oppressive order and you have learned to be impossible to find.',                         eg:'a hidden priest of a destroyed order, a revolutionary whose ideology has been outlawed, John Constantine' },
+  'devoted-endurer':   { name:'the pastor',            desc:'You serve your community in body as well as spirit. You mend bones, patch roofs, grow the herbs you use, and hold small villages together through things that would scatter everyone else.',           eg:'a village priest who is also the doctor, Friar Tuck, a frontier preacher who works the fields alongside their congregation' },
+  'devoted-sage':      { name:'the monastic',          desc:'You are the keeper of your order\'s memory. Lineages, relics, old accounts — you guard the institutional knowledge that tells your flock who they are and what they are for.',                        eg:'a high church scholar, Brother Cadfael, a theologian who has read everything and believes it' },
+  'devoted-wayfarer':  { name:'the pilgrim',           desc:'You walk a long road for a higher purpose. The journey is the discipline. You have seen more of the world than most priests and more of faith than most travelers, and neither has made you stop.',    eg:'a wandering monk, a desert prophet, a traveling healer, a palmer far from any holy land' },
+};
+
 const ARCH_CAREERS = {
   blade:    ['Mercenary', 'Gladiator', 'Blacksmith', 'Guard', 'Slayer', 'Knight'],
   shadow:   ['Cutpurse', 'Burglar', 'Assassin', 'Smuggler', 'Spy', 'Charlatan'],
@@ -160,50 +214,63 @@ function renderMatrix() {
   const order = ['blade', 'shadow', 'endurer', 'sage', 'wayfarer', 'devoted'];
   matrixGridElement.innerHTML = '';
 
-  // Draw Header Spacer Cell
+  // Extract primary/secondary selection state from your builderSel array safely
+  const [primaryId, secondaryId] = (typeof builderSel !== 'undefined') ? builderSel : [null, null];
+
+  // Corner Spacer Cell (Primary Rows vs Secondary Columns)
   const cornerLabel = document.createElement('div');
   cornerLabel.className = 'matrix-header cell-header-corner';
   cornerLabel.innerText = 'P \\ S';
   matrixGridElement.appendChild(cornerLabel);
 
-  // Column Headers
+  // Column Headers (Secondary Axis Mapping)
   order.forEach(colKey => {
     const colHeader = document.createElement('div');
     colHeader.className = 'matrix-header cell-header-col';
-    if (wizardState.secondaryArch === colKey) colHeader.classList.add('highlight-axis');
+    if (secondaryId === colKey) colHeader.classList.add('highlight-axis');
     colHeader.innerText = ARCH[colKey].name;
     matrixGridElement.appendChild(colHeader);
   });
 
-  // Rows and Cells
+  // Build out Rows and Cells sequentially
   order.forEach(rowKey => {
+    // Row Header (Primary Axis Mapping)
     const rowHeader = document.createElement('div');
     rowHeader.className = 'matrix-header cell-header-row';
-    if (wizardState.primaryArch === rowKey) rowHeader.classList.add('highlight-axis');
+    if (primaryId === rowKey) rowHeader.classList.add('highlight-axis');
     rowHeader.innerText = ARCH[rowKey].name;
     matrixGridElement.appendChild(rowHeader);
 
+    // Matrix Intersections
     order.forEach(colKey => {
       const cell = document.createElement('div');
       cell.className = 'matrix-cell';
       
-      // FIX: Inject the combined archetype label text into the cell
-      const primaryName = ARCH[rowKey].name;
-      const secondaryName = ARCH[colKey].name;
-      cell.innerText = (rowKey === colKey) ? `Pure ${primaryName}` : `${primaryName} / ${secondaryName}`;
+      // Look up direction-sensitive keys (e.g. 'blade-shadow' vs 'shadow-blade')
+      const cellKey = `${rowKey}-${colKey}`;
+      const coordinateData = MATRIX[cellKey];
+      
+      // Inject the explicit customized name from your discrete matrix configuration
+      cell.innerText = coordinateData ? coordinateData.name : '';
 
-      const isSelectedCell = (wizardState.primaryArch === rowKey && wizardState.secondaryArch === colKey);
+      const isSelectedCell = (primaryId === rowKey && secondaryId === colKey);
       if (isSelectedCell) {
         cell.classList.add('active-coordinate');
         cell.style.background = ARCH[rowKey].mid;
         cell.style.borderColor = ARCH[rowKey].border;
         cell.style.color = '#ffffff';
       } else {
-        // Subtle cross-gradient logic layout styling
+        // Keep your subtle cross-gradient layout background calculation
         cell.style.background = `linear-gradient(135deg, ${ARCH[rowKey].bg} 0%, ${ARCH[colKey].bg} 100%)`;
       }
 
-      cell.onclick = () => selectMatrixCoordinate(rowKey, colKey);
+      // Safely wire clicking behaviors back into the coordinate selections
+      if (typeof selectMatrixCoordinate === 'function') {
+        cell.onclick = () => selectMatrixCoordinate(rowKey, colKey);
+      } else if (typeof selectCoordinate === 'function') {
+        cell.onclick = () => selectCoordinate(rowKey, colKey);
+      }
+
       matrixGridElement.appendChild(cell);
     });
   });
