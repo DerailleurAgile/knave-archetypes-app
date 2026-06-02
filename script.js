@@ -405,16 +405,30 @@ function renderMatrixSelectionSummary() {
   const secondary = ARCH[wizardState.secondaryArch];
   const isSameArchetype = wizardState.primaryArch === wizardState.secondaryArch;
 
+  // Derive direction-sensitive key lookups matching your schema (e.g. 'blade-shadow')
+  const matrixKey = `${wizardState.primaryArch}-${wizardState.secondaryArch}`;
+  const callingData = MATRIX[matrixKey] || { name: 'Unknown Calling', desc: '...', eg: '' };
+
   container.innerHTML = `
-    <div class="arch-badges" style="margin-bottom: 12px;">
+    <!-- Top Configuration Layout Badges -->
+    <div class="arch-badges" style="margin-bottom: 16px;">
       <span class="arch-badge" style="background: ${primary.bg}; border-color: ${primary.border}; color: ${primary.txt}">
         Primary Focus: ${primary.name} (+2 or +3 to ${primary.stat})
       </span>
       <span class="arch-badge" style="background: ${secondary.bg}; border-color: ${secondary.border}; color: ${secondary.txt}">
-        Secondary Focus: ${secondary.name} (Can accept leftover points to ${secondary.stat})
+        Secondary Focus: ${secondary.name}
       </span>
     </div>
-    <p style="margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-faded);">
+
+    <!-- The Result-Box Card UI styling structure -->
+    <div class="result-box flash">
+      <div class="combo-name">${callingData.name}</div>
+      <div class="combo-desc">${callingData.desc}</div>
+      ${callingData.eg ? `<div class="combo-eg">Inspiration: ${callingData.eg}</div>` : ''}
+    </div>
+
+    <!-- System Prompt Context Readout Footer -->
+    <p style="margin-top: 16px; font-size: 14px; line-height: 1.5; color: var(--ink-faded);">
       Your core functional focus guides your background training: You excel at actions requiring you to <strong>${primary.prompt}</strong>. 
       ${!isSameArchetype ? `Your secondary background provides tricks allowing you to <strong>${secondary.prompt}</strong>.` : `Doubling down as a pure ${primary.name} concentrates your background paths explicitly inside their historical traditions.`}
     </p>
