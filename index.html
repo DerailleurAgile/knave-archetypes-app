@@ -11,106 +11,79 @@
 <body>
 
 <div class="page">
+    <div class="page-header">
+        <h1>The Codex of Callings</h1>
+        <span class="ornament">— ✦ —</span>
+        <p class="subtitle">An Alternative Concept-First Character Matrix for <em>Knave: Second Edition</em></p>
+    </div>
 
-  <div class="page-header">
-    <h1>The Codex of Callings</h1>
-    <span class="ornament">— ✦ —</span>
-    <p class="subtitle">An Alternative Concept-First Character Matrix for <em>Knave: Second Edition</em></p>
-  </div>
+    <!-- STEP PROGRESS TRACKER -->
+    <div class="wizard-progress">
+    <div class="progress-step active" id="badge-step-1">1. Archetype</div>
+    <div class="progress-step" id="badge-step-2">2. Attributes</div>
+    <div class="progress-step" id="badge-step-3">3. Careers</div>
+    <div class="progress-step" id="badge-step-4">4. Equipment & Summary</div>
+    </div>
 
-  <!-- <div class="two-col">
+    <div class="wizard-container">
     
-    <div class="panel panel-left">
-      <div class="panel-title">Archetype Matrix</div>
-      
-      <div class="matrix-container">
-        <div class="axis-label-x">✦ Secondary Archetype (Columns) ✦</div>
-        
-        <div class="matrix-wrapper-inner">
-          <div class="axis-label-y">✦ Primary Archetype (Rows) ✦</div>
-          
-          <div class="matrix-grid" id="archetype-matrix"></div>
+        <!-- STAGE 1: ARCHETYPE MATRIX -->
+        <div class="wizard-pane active" id="pane-step-1">
+            <div class="panel-title">Step 1: Select Your Character's Calling</div>
+            <div class="matrix-container">
+            <div class="axis-label-x">✦ Secondary Archetype (Columns) ✦</div>
+            <div class="matrix-wrapper-inner">
+                <div class="axis-label-y">✦ Primary Archetype (Rows) ✦</div>
+                <div class="matrix-grid" id="archetype-matrix"></div>
+            </div>
+            </div>
+            <div class="result-box" id="matrix-selection-summary">
+            <p class="result-hint">Select a cross-section on the matrix to establish your Primary and Secondary Archetypes.</p>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div class="panel panel-right">
-        <div class="result-box" id="builder-result">
-            <p class="result-hint">Select a cross-section on the matrix or an individual header axis to parse a pseudo-class setup.</p>
+        <!-- STAGE 2: ATTRIBUTE ALLOCATION -->
+        <div class="wizard-pane" id="pane-step-2">
+            <div class="panel-title">Step 2: Allocate Attribute Points</div>
+            <p class="step-instruction">Distribute 3 points. You must assign 2 or 3 points to your PRIMARY attribute. Remaining points may go to your SECONDARY attribute or any other attribute.</p>
+            <div class="points-left-badge">Points Remaining: <span id="pool-counter">3</span></div>
+            <div class="attributes-allocator" id="stats-app"></div>
+        </div>
+
+        <!-- STAGE 3: CAREER SELECTION -->
+        <div class="wizard-pane" id="pane-step-3">
+            <div class="panel-title">Step 3: Select Two Careers</div>
+            <p class="step-instruction">Choose 2 paths matching your active training archetype coordinates.</p>
+            <div id="career-selection-pools"></div>
+        </div>
+
+        <!-- STAGE 4: EQUIPMENT & SLOTS SUMMARY -->
+        <div class="wizard-pane" id="pane-step-4">
+            <div class="panel-title">Step 4: Gear Configuration & Character Sheet</div>
+            <div class="sheet-layout">
+            <div class="sheet-left">
+                <h3>Starting Career Equipment</h3>
+                <div id="career-gear-list"></div>
+                <button type="button" class="action-btn" onclick="rollStockGold()">Roll Stock Coin (3d6) & Take Standard Provisions</button>
+            </div>
+            <div class="sheet-right">
+                <h3>Inventory Slots (<span id="slot-tracker">0</span> / <span id="max-slots-tracker">10</span> Used)</h3>
+                <p class="slot-rule-text">Capacity: 10 + CON bonus item slots.</p>
+                <div class="inventory-display" id="inventory-slots-grid"></div>
+            </div>
+            </div>
         </div>
     </div>
 
-  </div> -->
-
-  <!-- STEP PROGRESS TRACKER -->
-<div class="wizard-progress">
-  <div class="progress-step active" id="badge-step-1">1. Archetype</div>
-  <div class="progress-step" id="badge-step-2">2. Attributes</div>
-  <div class="progress-step" id="badge-step-3">3. Careers</div>
-  <div class="progress-step" id="badge-step-4">4. Equipment & Summary</div>
-</div>
-
-<div class="wizard-container">
-  
-  <!-- STAGE 1: ARCHETYPE MATRIX -->
-  <div class="wizard-pane active" id="pane-step-1">
-    <div class="panel-title">Step 1: Select Your Calling Matrix Coordinate</div>
-    <div class="matrix-container">
-      <div class="axis-label-x">✦ Secondary Archetype (Columns) ✦</div>
-      <div class="matrix-wrapper-inner">
-        <div class="axis-label-y">✦ Primary Archetype (Rows) ✦</div>
-        <div class="matrix-grid" id="archetype-matrix"></div>
-      </div>
+    <!-- NAVIGATION BAR CONTROLS -->
+    <div class="wizard-navigation">
+        <button type="button" class="nav-btn secondary-btn" id="prev-btn" disabled onclick="moveStep(-1)">← Back</button>
+        <button type="button" class="nav-btn primary-btn" id="next-btn" disabled onclick="moveStep(1)">Next Step →</button>
     </div>
-    <div class="result-box" id="matrix-selection-summary">
-      <p class="result-hint">Select a cross-section on the matrix to establish your Primary and Secondary Archetypes.</p>
+
+    <div class="page-footer">
+        Knave: Second Edition by Ben Milton / Questing Beast LLC &nbsp;·&nbsp; Independent fan supplement reference
     </div>
-  </div>
-
-  <!-- STAGE 2: ATTRIBUTE ALLOCATION -->
-  <div class="wizard-pane" id="pane-step-2">
-    <div class="panel-title">Step 2: Allocate Attribute Points</div>
-    <p class="step-instruction">Distribute 3 points. You must assign 2 or 3 points to your PRIMARY attribute. Remaining points may go to your SECONDARY attribute or any other attribute.</p>
-    <div class="points-left-badge">Points Remaining: <span id="pool-counter">3</span></div>
-    <div class="attributes-allocator" id="stats-app"></div>
-  </div>
-
-  <!-- STAGE 3: CAREER SELECTION -->
-  <div class="wizard-pane" id="pane-step-3">
-    <div class="panel-title">Step 3: Select Two Careers</div>
-    <p class="step-instruction">Choose 2 paths matching your active training archetype coordinates.</p>
-    <div id="career-selection-pools"></div>
-  </div>
-
-  <!-- STAGE 4: EQUIPMENT & SLOTS SUMMARY -->
-  <div class="wizard-pane" id="pane-step-4">
-    <div class="panel-title">Step 4: Gear Configuration & Character Sheet</div>
-    <div class="sheet-layout">
-      <div class="sheet-left">
-        <h3>Starting Career Equipment</h3>
-        <div id="career-gear-list"></div>
-        <button type="button" class="action-btn" onclick="rollStockGold()">Roll Stock Coin (3d6) & Take Standard Provisions</button>
-      </div>
-      <div class="sheet-right">
-        <h3>Inventory Slots (<span id="slot-tracker">0</span> / <span id="max-slots-tracker">10</span> Used)</h3>
-        <p class="slot-rule-text">Capacity: 10 + CON bonus item slots.</p>
-        <div class="inventory-display" id="inventory-slots-grid"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- NAVIGATION BAR CONTROLS -->
-<div class="wizard-navigation">
-  <button type="button" class="nav-btn secondary-btn" id="prev-btn" disabled onclick="moveStep(-1)">← Back</button>
-  <button type="button" class="nav-btn primary-btn" id="next-btn" disabled onclick="moveStep(1)">Next Step →</button>
-</div>
-
-  <div class="page-footer">
-    Knave: Second Edition by Ben Milton / Questing Beast LLC &nbsp;·&nbsp; Independent fan supplement reference
-  </div>
-
 </div>
 <script src="script.js"></script>
 </body>

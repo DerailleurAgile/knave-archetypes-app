@@ -320,7 +320,7 @@ function renderMatrix() {
   // Corner Spacer Cell
   const cornerLabel = document.createElement('div');
   cornerLabel.className = 'matrix-corner';
-  cornerLabel.innerText = 'P \\ S';
+  // cornerLabel.innerText = 'P \\ S';
   matrixGridElement.appendChild(cornerLabel);
 
   // Column Headers (Secondary Axis)
