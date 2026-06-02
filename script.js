@@ -376,10 +376,13 @@ function renderMatrix() {
         cell.style.setProperty('--col-border', ARCH[rowKey].border);
         cell.style.setProperty('--col-txt', ARCH[rowKey].txt);
         cell.style.background = ARCH[rowKey].mid;
+        // cell.style.background = `linear-gradient(135deg, ${ARCH[rowKey].bg}, ${ARCH[colKey].bg})`;
+        // cell.style.background = 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)';
         cell.style.borderColor = ARCH[rowKey].border;
-        cell.style.color = '#ffffff';
+        cell.style.color = 'var(--ink)';
+        // cell.style.color = ARCH[rowKey].txt;
       } else {
-        cell.style.background = `linear-gradient(135deg, ${ARCH[rowKey].bg} 0%, ${ARCH[colKey].bg} 100%)`;
+        cell.style.background = '';
       }
 
       cell.onclick = () => selectMatrixCoordinate(rowKey, colKey);
