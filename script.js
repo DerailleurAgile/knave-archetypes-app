@@ -65,6 +65,8 @@ const ARCH = {
   },
 };
 
+const ARCH_ORDER = ['blade', 'shadow', 'endurer', 'sage', 'wayfarer', 'devoted'];
+
 // DIRECTION-SENSITIVE MATRIX — all 36 cells unique
 // Key: 'PRIMARY-SECONDARY' (Row = Primary, Column = Secondary)
 const MATRIX = {
@@ -666,7 +668,7 @@ function renderMatrix() {
   const matrixGridElement = document.getElementById("archetype-matrix");
   if (!matrixGridElement) return;
 
-  const order = ["blade", "shadow", "endurer", "sage", "wayfarer", "devoted"];
+  const order = ARCH_ORDER;
   matrixGridElement.innerHTML = "";
 
   // Read selection state from wizardState (single source of truth)
@@ -762,11 +764,8 @@ function renderMatrix() {
         cell.style.setProperty("--col-border", ARCH[rowKey].border);
         cell.style.setProperty("--col-txt", ARCH[rowKey].txt);
         cell.style.background = ARCH[rowKey].mid;
-        // cell.style.background = `linear-gradient(135deg, ${ARCH[rowKey].bg}, ${ARCH[colKey].bg})`;
-        // cell.style.background = 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)';
         cell.style.borderColor = ARCH[rowKey].border;
         cell.style.color = "var(--ink)";
-        // cell.style.color = ARCH[rowKey].txt;
       } else {
         cell.style.background = "";
       }
@@ -906,8 +905,9 @@ function initCareerSelection() {
     (career) => !sharedCareers.includes(career),
   );
 
+  const primaryBorder = ARCH[id1].border;
   let layoutHTML = `
-    <div style="margin-bottom:1rem; text-align:center; font-weight:600; color:var(--blade-border)">
+    <div style="margin-bottom:1rem; text-align:center; font-weight:600; color:${primaryBorder}">
       Selected Careers: ${wizardState.selectedCareers.length} / 2
     </div>
     <div class="careers-cols" style="display: grid; grid-template-columns: ${id1 === id2 ? "1fr" : "1fr 1fr"}; gap: 1.5rem;">
@@ -936,7 +936,7 @@ function initCareerSelection() {
     layoutHTML += `
       <div style="margin-top:1.5rem">
         <div class="col-label" style="color:var(--ink); border-bottom: 1px solid var(--rule); margin-bottom: 0.5rem; font-weight: 600;">
-          Shared Dynamic Intersections
+          Appears in Both Paths
         </div>
         <div style="display:flex; flex-wrap:wrap; gap:6px;">${buildCareerPillElements(sharedCareers, "background:var(--parchment-dark); border-color:var(--rule); color:var(--ink)")}</div>
       </div>
@@ -1001,11 +1001,11 @@ function initEquipmentSummary() {
     structuralCareerItems.forEach((item) => wizardState.inventory.push(item));
   });
 
-  // Knave 2e Spellbook Archetype Trigger: Give a starting spellbook if INT > 0
-  if (wizardState.attributes.INT > 0) {
-    const explicitSpellbookItem = "Spellbook (Contains 1 random Level-1 Spell)";
-    if (!wizardState.inventory.includes(explicitSpellbookItem)) {
-      wizardState.inventory.push(explicitSpellbookItem);
+  // Knave 2e p.4: PCs receive one random spellbook per INT point
+  const intScore = wizardState.attributes.INT;
+  if (intScore > 0) {
+    for (let i = 0; i < intScore; i++) {
+      wizardState.inventory.push(`Random Spellbook (INT point ${i + 1})`);
     }
   }
 
@@ -1026,24 +1026,22 @@ function initEquipmentSummary() {
 
 window.rollStockGold = function () {
   if (wizardState.hasRolledProvisions) {
-    alert(
-      "Provisions and starting coin have already been rolled for this character.",
-    );
+    alert("Starting coin and provisions have already been rolled for this character.");
     return;
   }
 
+  // Knave 2e p.4: 3d6×10 coins plus standard provisions
   const roll =
-    Math.floor(Math.random() * 6) +
-    1 +
+    (Math.floor(Math.random() * 6) + 1) +
     (Math.floor(Math.random() * 6) + 1) +
     (Math.floor(Math.random() * 6) + 1);
 
-  // Per Knave 2e: 3d6×10 coins, 2 rations, 50' rope, 2 torches
   const provisions = [
-    `${roll * 10} Coins (${roll}×10c)`,
+    `${roll * 10} Coins`,
     "2 Rations",
     "50' Rope",
     "2 Torches",
+    "Quiver (20 Arrows)",
   ];
 
   provisions.forEach((item) => wizardState.inventory.push(item));
