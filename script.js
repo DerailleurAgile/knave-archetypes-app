@@ -837,6 +837,18 @@ function initAttributeAllocation() {
   const secondaryStat = ARCH[wizardState.secondaryArch].stat;
   const isSameArch = wizardState.primaryArch === wizardState.secondaryArch;
 
+  // Pre-allocate on first entry only (pool still full means untouched)
+  if (wizardState.pointsToDistribute === 3) {
+    if (isSameArch) {
+      wizardState.attributes[primaryStat] = 3;
+      wizardState.pointsToDistribute = 0;
+    } else {
+      wizardState.attributes[primaryStat] = 2;
+      wizardState.attributes[secondaryStat] = 1;
+      wizardState.pointsToDistribute = 0;
+    }
+  }
+
   Object.keys(wizardState.attributes).forEach((stat) => {
     let tag = "";
     if (stat === primaryStat) {
