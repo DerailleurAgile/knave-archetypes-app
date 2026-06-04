@@ -266,158 +266,45 @@ const MATRIX = {
 };
 
 // Careers bucketed by primary stat they map to in play.
-// Many careers legitimately appear in two buckets (e.g. hunter = WIS for tracking + CON for exposure).
-// Items are verbatim from the Knave 2e rulebook (p.5).
 const ARCH_CAREERS = {
-  // STR — melee, raw physical power, heavy labour, heavy craft
   blade: [
-    "bandit",
-    "beast tamer",
-    "blacksmith",
-    "butcher",
-    "carpenter",
-    "fence",
-    "grave robber",
-    "guard",
-    "headsman",
-    "jailer",
-    "kidnapper",
-    "knight",
-    "mason",
-    "pit fighter",
-    "saboteur",
-    "shipwright",
-    "soldier",
-    "squire",
-    "thug",
-    "torturer",
-    "woodcutter",
+    "bandit", "beast tamer", "blacksmith", "butcher", "carpenter", "fence", 
+    "grave robber", "guard", "headsman", "jailer", "kidnapper", "knight", 
+    "mason", "pit fighter", "saboteur", "shipwright", "soldier", "squire", 
+    "thug", "torturer", "woodcutter",
   ],
-  // DEX — agility, stealth, fine manual skill, sleight of hand
   shadow: [
-    "acrobat",
-    "actor",
-    "assassin",
-    "barber",
-    "bookbinder",
-    "burglar",
-    "candlemaker",
-    "charlatan",
-    "cobbler",
-    "coachman",
-    "courtier",
-    "cutpurse",
-    "dyer",
-    "fence",
-    "gambler",
-    "jester",
-    "jeweler",
-    "locksmith",
-    "painter",
-    "puppeteer",
-    "rat catcher",
-    "sculptor",
-    "smuggler",
-    "spy",
-    "tailor",
-    "tattooist",
-    "thieftaker",
-    "thug",
+    "acrobat", "actor", "assassin", "barber", "bookbinder", "burglar", 
+    "candlemaker", "charlatan", "cobbler", "coachman", "courtier", "cutpurse", 
+    "dyer", "fence", "gambler", "jester", "jeweler", "locksmith", "painter", 
+    "puppeteer", "rat catcher", "sculptor", "smuggler", "spy", "tailor", 
+    "tattooist", "thieftaker", "thug",
   ],
-  // CON — endurance, hardiness, resisting exposure and deprivation
   endurer: [
-    "baker",
-    "beast tamer",
-    "boatman",
-    "brewer",
-    "cook",
-    "fisherman",
-    "gamekeeper",
-    "gardener",
-    "gravedigger",
-    "groom",
-    "hermit",
-    "hunter",
-    "innkeeper",
-    "miner",
-    "pilgrim",
-    "prospector",
-    "sailor",
-    "shepherd",
-    "soldier",
-    "trapper",
-    "woodcutter",
+    "baker", "beast tamer", "boatman", "brewer", "cook", "fisherman", 
+    "gamekeeper", "gardener", "gravedigger", "groom", "hermit", "hunter", 
+    "innkeeper", "miner", "pilgrim", "prospector", "sailor", "shepherd", 
+    "soldier", "trapper", "woodcutter",
   ],
-  // INT — knowledge, cunning, arcane, calculation, craft-knowledge
   sage: [
-    "alchemist",
-    "antiquarian",
-    "arcanist",
-    "architect",
-    "astrologer",
-    "bookbinder",
-    "folklorist",
-    "herbalist",
-    "investigator",
-    "lawyer",
-    "naturalist",
-    "oracle",
-    "philosopher",
-    "physician",
-    "playwright",
-    "scribe",
+    "alchemist", "antiquarian", "arcanist", "architect", "astrologer", 
+    "bookbinder", "folklorist", "herbalist", "investigator", "lawyer", 
+    "naturalist", "oracle", "philosopher", "physician", "playwright", "scribe",
   ],
-  // WIS — perception, navigation, ranged attacks, foraging, reading the wild
   wayfarer: [
-    "beast tamer",
-    "beekeeper",
-    "boatman",
-    "courier",
-    "explorer",
-    "falconer",
-    "fisherman",
-    "gamekeeper",
-    "herbalist",
-    "hermit",
-    "hunter",
-    "naturalist",
-    "peddler",
-    "pilgrim",
-    "pirate",
-    "poacher",
-    "prospector",
-    "sailor",
-    "scout",
-    "shepherd",
-    "trapper",
-    "watchman",
+    "beast tamer", "beekeeper", "boatman", "courier", "explorer", "falconer", 
+    "fisherman", "gamekeeper", "herbalist", "hermit", "hunter", "naturalist", 
+    "peddler", "pilgrim", "pirate", "poacher", "prospector", "sailor", 
+    "scout", "shepherd", "trapper", "watchman",
   ],
-  // CHA — persuasion, performance, leadership, patron blessings, initiative
   devoted: [
-    "acolyte",
-    "actor",
-    "courtier",
-    "cultist",
-    "inquisitor",
-    "jester",
-    "knight",
-    "lawyer",
-    "merchant",
-    "musician",
-    "officer",
-    "oracle",
-    "orator",
-    "philosopher",
-    "pilgrim",
-    "poet",
-    "priest",
-    "servant",
-    "singer",
+    "acolyte", "actor", "courtier", "cultist", "inquisitor", "jester", 
+    "knight", "lawyer", "merchant", "musician", "officer", "oracle", 
+    "orator", "philosopher", "pilgrim", "poet", "priest", "servant", "singer",
   ],
 };
 
 // Exact starting items per career, verbatim from Knave 2e p.5.
-// Keys are lowercase career names to match toggleWizardCareer's normalisation.
 const CAREER_ITEMS = {
   acolyte: ["Candlestick", "Censer", "Incense"],
   acrobat: ["Flash powder", "Balls", "Lamp oil"],
@@ -678,7 +565,6 @@ function renderMatrix() {
   // Corner Spacer Cell
   const cornerLabel = document.createElement("div");
   cornerLabel.className = "matrix-corner";
-  // cornerLabel.innerText = 'P \\ S';
   matrixGridElement.appendChild(cornerLabel);
 
   // Column Headers (Secondary Axis)
@@ -770,7 +656,6 @@ function renderMatrix() {
       const cell = document.createElement("div");
       cell.className = "matrix-cell";
 
-      // Look up direction-sensitive keys (e.g. 'blade-shadow' vs 'shadow-blade')
       const cellKey = `${rowKey}-${colKey}`;
       const coordinateData = MATRIX[cellKey];
 
@@ -779,14 +664,12 @@ function renderMatrix() {
         if (!coordinateData) return;
         const tooltip = document.getElementById("matrix-tooltip");
 
-        // Update content
         tooltip.innerHTML = `
             <div class="combo-name">${coordinateData.name}</div>
             <div class="combo-desc">${coordinateData.desc}</div>
             ${coordinateData.eg ? `<div class="combo-eg">Inspiration: ${coordinateData.eg}</div>` : ''}
         `;
 
-        // Position tooltip
         tooltip.style.display = "block";
         updateTooltipPosition(e);
       });
@@ -838,7 +721,6 @@ function renderMatrixSelectionSummary() {
   const secondary = ARCH[wizardState.secondaryArch];
   const isSameArchetype = wizardState.primaryArch === wizardState.secondaryArch;
 
-  // Derive direction-sensitive key lookups matching your schema (e.g. 'blade-shadow')
   const matrixKey = `${wizardState.primaryArch}-${wizardState.secondaryArch}`;
   const callingData = MATRIX[matrixKey] || {
     name: "Unknown Calling",
@@ -882,7 +764,6 @@ function initAttributeAllocation() {
   const secondaryStat = ARCH[wizardState.secondaryArch].stat;
   const isSameArch = wizardState.primaryArch === wizardState.secondaryArch;
 
-  // Pre-allocate on first entry only (pool still full means untouched)
   if (wizardState.pointsToDistribute === 3) {
     if (isSameArch) {
       wizardState.attributes[primaryStat] = 3;
@@ -1001,6 +882,39 @@ function initCareerSelection() {
   }
 
   container.innerHTML = layoutHTML;
+
+  // Bind floating tooltip card event listeners to rendered career pills
+  container.querySelectorAll('.career-pill').forEach((pill) => {
+    const careerKey = pill.getAttribute('data-career-key');
+    const careerName = pill.getAttribute('data-career-name');
+
+    pill.addEventListener('mouseover', (e) => {
+      const items = CAREER_ITEMS[careerKey] || [];
+      const tooltip = document.getElementById("matrix-tooltip");
+      if (!tooltip) return;
+
+      tooltip.innerHTML = `
+        <div class="combo-name">${careerName}</div>
+        <div class="combo-desc">
+          <span style="font-size: 11px; font-family: 'Cinzel', serif; letter-spacing: 0.05em; display: block; margin-bottom: 4px; color: var(--ink-ghost);">Starting Gear:</span>
+          <ul style="padding-left: 1.15rem; margin: 0; list-style-type: square;">
+            ${items.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+      tooltip.style.display = "block";
+      updateTooltipPosition(e);
+    });
+
+    pill.addEventListener('mousemove', (e) => {
+      updateTooltipPosition(e);
+    });
+
+    pill.addEventListener('mouseout', () => {
+      const tooltip = document.getElementById("matrix-tooltip");
+      if (tooltip) tooltip.style.display = "none";
+    });
+  });
 }
 
 function buildCareerPillElements(careerList, pillInlineStyles) {
@@ -1010,13 +924,12 @@ function buildCareerPillElements(careerList, pillInlineStyles) {
       const isSelected = wizardState.selectedCareers.includes(generalizedKey);
       const dynamicSelectionClass = isSelected ? "selected" : "";
 
-      // Explicit selection indicators matching original styler schemas
       const styleOverride = isSelected
         ? `${pillInlineStyles}; box-shadow: inset 0 0 0 2px var(--ink); font-weight: bold; transform: scale(1.03);`
         : pillInlineStyles;
 
       return `
-      <span class="pill ${dynamicSelectionClass}" style="${styleOverride}; cursor:pointer; padding:6px 12px; border-radius:4px; display:inline-block; transition:all 0.15s;" 
+      <span class="pill career-pill ${dynamicSelectionClass}" data-career-key="${generalizedKey}" data-career-name="${careerName}" style="${styleOverride}; cursor:pointer; padding:6px 12px; border-radius:4px; display:inline-block; transition:all 0.15s;" 
             onclick="toggleWizardCareer('${generalizedKey}')">
         ${careerName} ${isSelected ? "✓" : ""}
       </span>
@@ -1031,7 +944,6 @@ window.toggleWizardCareer = function (careerKey) {
   if (index > -1) {
     wizardState.selectedCareers.splice(index, 1);
   } else {
-    // Structural Rule: Maximum boundary cap at 2 careers
     if (wizardState.selectedCareers.length >= 2) return;
     wizardState.selectedCareers.push(careerKey);
   }
@@ -1049,8 +961,6 @@ function initEquipmentSummary() {
   if (!gearListContainer) return;
 
   gearListContainer.innerHTML = "";
-
-  // Wipe and rebuild baseline equipment arrays based on chosen career pools
   wizardState.inventory = [];
 
   wizardState.selectedCareers.forEach((careerKey) => {
@@ -1058,7 +968,6 @@ function initEquipmentSummary() {
     structuralCareerItems.forEach((item) => wizardState.inventory.push(item));
   });
 
-  // Knave 2e p.4: PCs receive one random spellbook per INT point
   const intScore = wizardState.attributes.INT;
   if (intScore > 0) {
     for (let i = 0; i < intScore; i++) {
@@ -1066,7 +975,6 @@ function initEquipmentSummary() {
     }
   }
 
-  // Render text readouts
   if (wizardState.inventory.length === 0) {
     gearListContainer.innerHTML =
       '<p class="step-instruction">No equipment loaded. Check upstream choices.</p>';
@@ -1087,7 +995,6 @@ window.rollStockGold = function () {
     return;
   }
 
-  // Knave 2e p.4: 3d6×10 coins plus standard provisions
   const roll =
     (Math.floor(Math.random() * 6) + 1) +
     (Math.floor(Math.random() * 6) + 1) +
@@ -1104,7 +1011,6 @@ window.rollStockGold = function () {
   provisions.forEach((item) => wizardState.inventory.push(item));
   wizardState.hasRolledProvisions = true;
 
-  // Re-render gear list without resetting inventory
   const gearListContainer = document.getElementById("career-gear-list");
   if (gearListContainer) {
     gearListContainer.innerHTML = `
@@ -1124,7 +1030,6 @@ function refreshInventoryDisplay() {
   if (!inventoryGridElement) return;
   inventoryGridElement.innerHTML = "";
 
-  // Structural Carrying Rule: Maximum safe boundary capacity calculation formula ($10 + \text{CON}$)
   const configuredMaxCarryCapacity = 10 + wizardState.attributes.CON;
   const itemsCurrentlyInInventory = wizardState.inventory.length;
 
@@ -1150,7 +1055,6 @@ function refreshInventoryDisplay() {
     inventoryGridElement.appendChild(rowDiv);
   }
 
-  // Visual alert if inventory exceeds carry capacity
   if (itemsCurrentlyInInventory > configuredMaxCarryCapacity) {
     if (currentSlotsTracker)
       currentSlotsTracker.style.color = "var(--blade-border)";
