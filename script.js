@@ -696,6 +696,30 @@ function renderMatrix() {
       if (wizardState.primaryArch)
         selectMatrixCoordinate(wizardState.primaryArch, colKey);
     };
+
+    // Column Header Tooltip Handlers
+    colHeader.addEventListener("mouseover", (e) => {
+      const archData = ARCH[colKey];
+      if (!archData) return;
+      const tooltip = document.getElementById("matrix-tooltip");
+
+      tooltip.innerHTML = `
+          <div class="combo-name" style="text-transform: capitalize;">${archData.name} Archetype (${archData.stat})</div>
+          <div class="combo-eg">Focus: ${archData.prompt}</div>
+      `;
+
+      tooltip.style.display = "block";
+      updateTooltipPosition(e);
+    });
+
+    colHeader.addEventListener('mousemove', (e) => {
+      updateTooltipPosition(e);
+    });
+
+    colHeader.addEventListener("mouseout", () => {
+      document.getElementById("matrix-tooltip").style.display = "none";
+    });
+
     matrixGridElement.appendChild(colHeader);
   });
 
@@ -715,6 +739,30 @@ function renderMatrix() {
       if (wizardState.secondaryArch)
         selectMatrixCoordinate(rowKey, wizardState.secondaryArch);
     };
+
+    // Row Header Tooltip Handlers
+    rowHeader.addEventListener("mouseover", (e) => {
+      const archData = ARCH[rowKey];
+      if (!archData) return;
+      const tooltip = document.getElementById("matrix-tooltip");
+
+      tooltip.innerHTML = `
+          <div class="combo-name" style="text-transform: capitalize;">${archData.name} Archetype (${archData.stat})</div>
+          <div class="combo-eg">Focus: ${archData.prompt}</div>
+      `;
+
+      tooltip.style.display = "block";
+      updateTooltipPosition(e);
+    });
+
+    rowHeader.addEventListener('mousemove', (e) => {
+      updateTooltipPosition(e);
+    });
+
+    rowHeader.addEventListener("mouseout", () => {
+      document.getElementById("matrix-tooltip").style.display = "none";
+    });
+
     matrixGridElement.appendChild(rowHeader);
 
     // Matrix Intersections
@@ -799,7 +847,6 @@ function renderMatrixSelectionSummary() {
   };
 
   container.innerHTML = `
-    <!-- Top Configuration Layout Badges -->
     <div class="arch-badges" style="margin-bottom: 16px;">
       <span class="arch-badge" style="background: ${primary.bg}; border-color: ${primary.border}; color: ${primary.txt}">
         Primary Focus: ${primary.name} (+2 or +3 to ${primary.stat})
@@ -809,14 +856,12 @@ function renderMatrixSelectionSummary() {
       </span>
     </div>
 
-    <!-- The Result-Box Card UI styling structure -->
     <div class="result-box flash">
       <div class="combo-name">${callingData.name}</div>
       <div class="combo-desc">${callingData.desc}</div>
       ${callingData.eg ? `<div class="combo-eg">Inspiration: ${callingData.eg}</div>` : ""}
     </div>
 
-    <!-- System Prompt Context Readout Footer -->
     <p style="margin-top: 16px; font-size: 14px; line-height: 1.5; color: var(--ink-faded);">
       Your core functional focus guides your background training: You excel at actions requiring you to <strong>${primary.prompt}</strong>. 
       ${!isSameArchetype ? `Your secondary background provides tricks allowing you to <strong>${secondary.prompt}</strong>.` : `Doubling down as a pure ${primary.name} concentrates your background paths explicitly inside their historical traditions.`}
